@@ -166,17 +166,6 @@ test("uses Home Assistant translations with English fallbacks", () => {
   assert.equal(card._localizePeriod("month"), "Month");
 });
 
-test("uses Today for the current day and Day after navigation", () => {
-  const card = new Card();
-  card._hass = createHass("custom");
-  card._active = "today";
-
-  assert.equal(card._localizePeriod("today"), "Localized today");
-
-  card._preservedRangeKey = "shifted-range";
-  assert.equal(card._localizePeriod("today"), "Localized day");
-});
-
 test("renders an accessible dropdown, date range, and theme extension points", () => {
   const card = new Card();
   card._hass = createHass();
@@ -198,6 +187,8 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
+  assert.match(card.shadowRoot.innerHTML, /data-today/);
+  assert.match(card.shadowRoot.innerHTML, />Today<\/button>/);
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
     card.shadowRoot.innerHTML,
@@ -240,62 +231,37 @@ test("shifts the selected period backward and forward", async () => {
 
   assert.deepEqual(directions, [false, true]);
   assert.equal(card._active, "week");
+  assert.equal(card._offset, 0);
   assert.equal(card._rangeStart.getDate(), 6);
   assert.equal(card._rangeEnd.getDate(), 12);
 });
 
-test("detects Home Assistant-provided preset ranges", async () => {
+test("starts a new card instance on Today", async () => {
   const card = new Card();
   card._hass = createHass();
-  const ranges = {
-    today: {
+  card._config = { collection_key: "energy_1" };
+  card.isConnected = true;
+  const selectedPeriods = [];
+  card._adapter = {
+    ensure: async () => {},
+    setPeriod: async (period) => {
+      selectedPeriods.push(period);
+      return {
       start: new Date(2026, 6, 29, 0, 0, 0, 0),
       end: new Date(2026, 6, 29, 23, 59, 59, 999),
-    },
-    week: {
-      start: new Date(2026, 6, 27, 0, 0, 0, 0),
-      end: new Date(2026, 7, 2, 23, 59, 59, 999),
+      };
     },
   };
-  card._adapter = {
-    getPresetRange: async (period) => ranges[period],
-  };
 
-  assert.equal(
-    await card._detectPeriod(ranges.week.start, ranges.week.end),
-    "week"
-  );
-  assert.equal(
-    await card._detectPeriod(
-      new Date(2026, 6, 1),
-      new Date(2026, 6, 12)
-    ),
-    undefined
-  );
+  await card._initialize();
+
+  assert.deepEqual(selectedPeriods, ["today"]);
+  assert.equal(card._active, "today");
+  assert.equal(card._offset, 0);
+  assert.equal(card._initialPeriodApplied, true);
 });
 
-test("honors Home Assistant-provided week boundaries", async () => {
-  const card = new Card();
-  card._hass = createHass();
-  const sundayFirstWeek = {
-    start: new Date(2026, 6, 26, 0, 0, 0, 0),
-    end: new Date(2026, 7, 1, 23, 59, 59, 999),
-  };
-  card._adapter = {
-    getPresetRange: async (period) =>
-      period === "week" ? sundayFirstWeek : undefined,
-  };
-
-  assert.equal(
-    await card._detectPeriod(
-      sundayFirstWeek.start,
-      sundayFirstWeek.end
-    ),
-    "week"
-  );
-});
-
-test("clears the active state for a custom date range", async () => {
+test("synchronizes external dates without changing the selected unit", async () => {
   const card = new Card();
   card._hass = createHass();
   card._active = "month";
@@ -306,11 +272,10 @@ test("clears the active state for a custom date range", async () => {
       start: new Date(2026, 6, 1),
       end: new Date(2026, 6, 12),
     }),
-    getPresetRange: async () => undefined,
   };
 
   await card._syncFromNative();
-  assert.equal(card._active, undefined);
+  assert.equal(card._active, "month");
   assert.equal(card._rangeStart.getDate(), 1);
   assert.equal(card._rangeEnd.getDate(), 12);
 });

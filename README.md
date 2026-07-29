@@ -10,9 +10,10 @@ A compact Home Assistant dashboard card with a dropdown for selecting the Energy
 - Synchronizes with other cards using the same Energy data collection
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
 - Uses Home Assistant's neutral localized labels for Day, Week, Month, and Year
-- Shows Home Assistant's localized "Today" label for the current day and switches to the neutral "Day" label after navigation
+- Starts on Today whenever a new card instance initializes
 - Shows the active date range below the period dropdown
 - Navigates backward or forward by one selected period with date arrows
+- Includes a localized Today button for returning to the current day
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
 - Detects incompatible Home Assistant Energy selector changes and shows an error
@@ -42,6 +43,8 @@ If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-peri
 > **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
 >
 > **Breaking change in v2.0.0:** The four localized buttons were replaced with one localized dropdown.
+>
+> **Breaking change in v3.0.0:** A new card instance always sets its shared Energy collection to Today. The dropdown shows neutral period units, and a separate Today button resets the selection.
 
 The card supports Home Assistant's visual card editor. YAML configuration remains available:
 

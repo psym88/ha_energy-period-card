@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "2.2.0";
+const CARD_VERSION = "3.0.0";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -50,16 +50,6 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-}
-
-function sameCalendarDay(first, second) {
-  return (
-    first instanceof Date &&
-    second instanceof Date &&
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate()
-  );
 }
 
 function withTimeout(promise, timeoutMs, message) {
@@ -234,9 +224,10 @@ class HaEnergyPeriodCard extends HTMLElement {
     this._hass = undefined;
     this._adapter = new EnergyPeriodAdapter(this);
     this._active = undefined;
+    this._offset = 0;
     this._rangeStart = undefined;
     this._rangeEnd = undefined;
-    this._preservedRangeKey = undefined;
+    this._initialPeriodApplied = false;
     this._syncTimer = undefined;
     this._syncInterval = undefined;
     this._justClickedUntil = 0;
@@ -296,7 +287,11 @@ class HaEnergyPeriodCard extends HTMLElement {
       this._config.collection_key !== config.collection_key;
     this._config = { title: "", show_card: true, ...config };
     this._error = undefined;
-    if (collectionChanged) this._active = undefined;
+    if (collectionChanged) {
+      this._active = undefined;
+      this._offset = 0;
+      this._initialPeriodApplied = false;
+    }
     this._render();
     this._initialize();
   }
@@ -355,7 +350,22 @@ class HaEnergyPeriodCard extends HTMLElement {
       await this._adapter.ensure(this._hass, this._config.collection_key);
       if (initializationId !== this._initializationId) return;
       this._clearError();
-      await this._syncFromNative();
+      if (!this._initialPeriodApplied) {
+        const range = await this._adapter.setPeriod(
+          "today",
+          this._hass,
+          this._config.collection_key
+        );
+        if (initializationId !== this._initializationId) return;
+        this._active = "today";
+        this._offset = 0;
+        this._rangeStart = new Date(range.start);
+        this._rangeEnd = new Date(range.end);
+        this._initialPeriodApplied = true;
+        this._updateControl();
+      } else {
+        await this._syncFromNative();
+      }
     } catch (error) {
       if (initializationId !== this._initializationId) return;
       this._setError(error);
@@ -382,15 +392,6 @@ class HaEnergyPeriodCard extends HTMLElement {
 
       this._rangeStart = new Date(start);
       this._rangeEnd = new Date(end);
-      const detected = await this._detectPeriod(start, end);
-      const rangeKey = this._getRangeKey(start, end);
-      if (detected) {
-        this._active = detected;
-        this._preservedRangeKey = undefined;
-      } else if (rangeKey !== this._preservedRangeKey) {
-        this._active = undefined;
-        this._preservedRangeKey = undefined;
-      }
       this._updateControl();
     } catch (error) {
       this._setError(error);
@@ -411,9 +412,9 @@ class HaEnergyPeriodCard extends HTMLElement {
       );
       this._clearError();
       this._active = period;
+      this._offset = 0;
       this._rangeStart = new Date(range.start);
       this._rangeEnd = new Date(range.end);
-      this._preservedRangeKey = undefined;
       this._updateControl();
     } catch (error) {
       this._setError(error);
@@ -421,24 +422,6 @@ class HaEnergyPeriodCard extends HTMLElement {
       this._setBusy(false);
       this._scheduleSync();
     }
-  }
-
-  async _detectPeriod(start, end) {
-    for (const period of PERIODS) {
-      const range = await this._adapter.getPresetRange(period, this._hass);
-      if (
-        range &&
-        sameCalendarDay(start, range.start) &&
-        sameCalendarDay(end, range.end)
-      ) {
-        return period;
-      }
-    }
-    return undefined;
-  }
-
-  _getRangeKey(start, end) {
-    return `${new Date(start).getTime()}:${new Date(end).getTime()}`;
   }
 
   async _shiftPeriod(forward) {
@@ -452,7 +435,7 @@ class HaEnergyPeriodCard extends HTMLElement {
       this._clearError();
       this._rangeStart = new Date(range.start);
       this._rangeEnd = new Date(range.end);
-      this._preservedRangeKey = this._getRangeKey(range.start, range.end);
+      this._offset += forward ? 1 : -1;
       this._updateControl();
     } catch (error) {
       this._setError(error);
@@ -463,16 +446,6 @@ class HaEnergyPeriodCard extends HTMLElement {
   }
 
   _localizePeriod(period) {
-    if (
-      period === "today" &&
-      this._active === "today" &&
-      !this._preservedRangeKey
-    ) {
-      const today = this._hass?.localize?.(
-        "ui.components.date-range-picker.ranges.today"
-      );
-      if (today) return today;
-    }
     const labelKey = PERIOD_LABEL_KEYS[period];
     return (
       this._hass?.localize?.(
@@ -534,6 +507,8 @@ class HaEnergyPeriodCard extends HTMLElement {
         (button) =>
           (button.disabled = this._busy || !this._hass || !this._active)
       );
+    const todayButton = this.shadowRoot.querySelector?.("button[data-today]");
+    if (todayButton) todayButton.disabled = this._busy || !this._hass;
   }
 
   _render() {
@@ -549,6 +524,10 @@ class HaEnergyPeriodCard extends HTMLElement {
       this._hass?.localize?.(
         "ui.panel.lovelace.components.energy_period_selector.next"
       ) || "Next period";
+    const todayLabel =
+      this._hass?.localize?.(
+        "ui.components.date-range-picker.ranges.today"
+      ) || "Today";
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -638,6 +617,32 @@ class HaEnergyPeriodCard extends HTMLElement {
           cursor: default;
           opacity: var(--disabled-opacity, .55);
         }
+        .today-row {
+          display: flex;
+          justify-content: center;
+          margin-top: var(--ha-space-1, 4px);
+        }
+        .today-reset {
+          border: 0;
+          border-radius: var(--ha-button-border-radius, 999px);
+          padding: var(--ha-space-1, 4px) var(--ha-space-3, 12px);
+          color: var(--primary-color);
+          background: transparent;
+          font: inherit;
+          font-size: var(--ha-font-size-s, 12px);
+          cursor: pointer;
+        }
+        .today-reset:hover:not(:disabled) {
+          background: var(--divider-color);
+        }
+        .today-reset:focus-visible {
+          outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
+          outline-offset: 2px;
+        }
+        .today-reset:disabled {
+          cursor: default;
+          opacity: var(--disabled-opacity, .55);
+        }
         .error {
           margin-top: var(--ha-space-2, 8px);
           color: var(--error-color);
@@ -683,6 +688,14 @@ class HaEnergyPeriodCard extends HTMLElement {
             ${this._busy || !this._hass || !this._active ? "disabled" : ""}
           >›</button>
         </div>
+        <div class="today-row">
+          <button
+            class="today-reset"
+            type="button"
+            data-today
+            ${this._busy || !this._hass ? "disabled" : ""}
+          >${escapeHtml(todayLabel)}</button>
+        </div>
         ${
           this._error
             ? `<div class="error" role="alert">${escapeHtml(this._error)}</div>`
@@ -706,6 +719,9 @@ class HaEnergyPeriodCard extends HTMLElement {
           this._shiftPeriod(button.dataset.shift === "next")
         )
       );
+    this.shadowRoot
+      .querySelector?.("button[data-today]")
+      ?.addEventListener("click", () => this._setPeriod("today"));
 
     this._rendered = true;
     this._updateControl();
