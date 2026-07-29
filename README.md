@@ -40,12 +40,6 @@ If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-peri
 
 ## Configuration
 
-> **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
->
-> **Breaking change in v2.0.0:** The four localized buttons were replaced with one localized dropdown.
->
-> **Breaking change in v3.0.0:** A new card instance always sets its shared Energy collection to Today. The dropdown shows neutral period units, and a separate Today button resets the selection.
-
 The card supports Home Assistant's visual card editor. YAML configuration remains available:
 
 ```yaml
