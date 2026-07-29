@@ -244,6 +244,10 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(30px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\);[\s\S]*?background: var\(--card-background-color\)/
   );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /div\.wrapper \.date-navigation button\[data-shift\] \{\s*width: calc\(30px \+ 2 \* var\(--ha-space-3, 12px\)\)/
+  );
 });
 
 test("renders the frameless mode without a card wrapper", () => {
