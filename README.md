@@ -2,6 +2,8 @@
 
 Eine kompakte Home-Assistant-Dashboard-Karte zur Auswahl des aktuellen Energy-Zeitraums: Heute, Woche, Monat oder Jahr.
 
+![Vorschau der HA Energy Period Card](images/preview.svg)
+
 ## Funktionen
 
 - Verwendet Home Assistants nativen Energy-Zeitraum
