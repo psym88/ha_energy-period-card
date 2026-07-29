@@ -168,7 +168,13 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, />This year<\/option>/);
   assert.match(card.shadowRoot.innerHTML, /class="date-range"/);
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
+  assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
+  assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /font-size: var\(--ha-font-size-l, 16px\)/
+  );
   assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
@@ -178,6 +184,32 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
   );
+});
+
+test("shifts the selected period backward and forward", async () => {
+  const card = new Card();
+  card._hass = createHass();
+  card._config = { collection_key: "energy_1" };
+  card._active = "week";
+  const directions = [];
+  card._adapter = {
+    ensure: async () => {},
+    shift: async (forward) => {
+      directions.push(forward);
+      return {
+        start: new Date(2026, 6, forward ? 6 : 20),
+        end: new Date(2026, 6, forward ? 12 : 26),
+      };
+    },
+  };
+
+  await card._shiftPeriod(false);
+  await card._shiftPeriod(true);
+
+  assert.deepEqual(directions, [false, true]);
+  assert.equal(card._active, "week");
+  assert.equal(card._rangeStart.getDate(), 6);
+  assert.equal(card._rangeEnd.getDate(), 12);
 });
 
 test("detects Home Assistant-provided preset ranges", async () => {

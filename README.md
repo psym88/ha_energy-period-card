@@ -11,6 +11,7 @@ A compact Home Assistant dashboard card with a dropdown for selecting the curren
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
 - Localizes dropdown labels through Home Assistant
 - Shows the active date range below the period dropdown
+- Navigates backward or forward by one selected period with date arrows
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
 - Detects incompatible Home Assistant Energy selector changes and shows an error
