@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.1.0";
+const CARD_VERSION = "3.1.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -531,12 +531,8 @@ class HaEnergyPeriodCard extends HTMLElement {
     if (!this._rendered) return;
     const select = this.shadowRoot.querySelector?.("select[data-period]");
     if (select) {
-      const value = this._active || "today";
-      if (select.value !== value) select.value = value;
-      const disabled = this._busy || !this._hass;
-      if (select.disabled !== disabled) select.disabled = disabled;
-      const dayOption = select.querySelector?.('option[value="today"]');
-      if (dayOption) dayOption.textContent = this._localizePeriod("today");
+      select.value = this._active || "";
+      select.disabled = this._busy || !this._hass;
     }
     const dateRange = this.shadowRoot.querySelector?.(".date-range");
     if (dateRange) {
@@ -671,6 +667,7 @@ class HaEnergyPeriodCard extends HTMLElement {
           aria-label="Energy period"
           ${this._busy || !this._hass ? "disabled" : ""}
         >
+          <option value="" hidden>Select period</option>
           ${PERIODS.map(
             (period) =>
               `<option value="${period}" ${

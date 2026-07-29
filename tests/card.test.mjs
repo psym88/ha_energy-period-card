@@ -186,7 +186,10 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /<option value="week"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="month"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="year"/);
-  assert.doesNotMatch(card.shadowRoot.innerHTML, /Select period/);
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /<option value="" hidden>Select period<\/option>/
+  );
   assert.match(card.shadowRoot.innerHTML, />Day<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
