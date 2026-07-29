@@ -582,7 +582,7 @@ class HaEnergyPeriodCard extends HTMLElement {
         .date-range {
           min-width: 0;
           color: var(--secondary-text-color);
-          font-size: var(--ha-font-size-s, 12px);
+          font-size: var(--ha-font-size-m, 14px);
           line-height: var(--ha-line-height-normal, 1.4);
           text-align: center;
         }

@@ -175,6 +175,10 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /font-size: var\(--ha-font-size-l, 16px\)/
   );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-range \{[\s\S]*?font-size: var\(--ha-font-size-m, 14px\)/
+  );
   assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
