@@ -68,9 +68,16 @@ function createHass(language = "en") {
   const labels = {
     en: {
       today: "Today",
+      yesterday: "Yesterday",
+      tomorrow: "Tomorrow",
       this_week: "This week",
+      last_week: "Last week",
+      next_week: "Next week",
       this_month: "This month",
+      last_month: "Last month",
+      next_month: "Next month",
       this_year: "This year",
+      last_year: "Last year",
     },
     custom: {
       today: "Localized today",
@@ -188,8 +195,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
-  assert.match(card.shadowRoot.innerHTML, /data-today/);
-  assert.match(card.shadowRoot.innerHTML, />Today<\/button>/);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /data-today/);
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
     card.shadowRoot.innerHTML,
@@ -208,6 +214,37 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
   );
+});
+
+test("uses only relative labels supplied by Home Assistant", () => {
+  const card = new Card();
+  card._hass = createHass();
+  card._rangeStart = new Date(2026, 6, 29);
+  card._rangeEnd = new Date(2026, 6, 29, 23, 59, 59);
+  card._active = "today";
+
+  card._offset = 0;
+  assert.equal(card._formatDateRange(), "Today");
+  card._offset = -1;
+  assert.equal(card._formatDateRange(), "Yesterday");
+
+  card._active = "week";
+  assert.equal(card._formatDateRange(), "Last week");
+
+  card._offset = -2;
+  assert.equal(card._formatDateRange(), "07/29/2026 – 07/29/2026");
+});
+
+test("formats a day fallback as one date instead of a date range", () => {
+  const card = new Card();
+  card._hass = createHass();
+  card._hass.localize = () => "";
+  card._active = "today";
+  card._offset = -2;
+  card._rangeStart = new Date(2026, 6, 27);
+  card._rangeEnd = new Date(2026, 6, 27, 23, 59, 59);
+
+  assert.equal(card._formatDateRange(), "07/27/2026");
 });
 
 test("shifts the selected period backward and forward", async () => {
