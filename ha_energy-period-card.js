@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.1.3";
+const CARD_VERSION = "3.1.4";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -470,6 +470,10 @@ class HaEnergyPeriodCard extends HTMLElement {
     }
   }
 
+  _resetToCurrentPeriod() {
+    return this._setPeriod(this._active || "today");
+  }
+
   _localizePeriod(period) {
     const labelKey = PERIOD_LABEL_KEYS[period];
     return (
@@ -745,7 +749,7 @@ class HaEnergyPeriodCard extends HTMLElement {
       );
     this.shadowRoot
       .querySelector?.("button[data-today]")
-      ?.addEventListener("click", () => this._setPeriod("today"));
+      ?.addEventListener("click", () => this._resetToCurrentPeriod());
     this._rendered = true;
     this._updateControl();
   }

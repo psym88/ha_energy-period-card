@@ -272,6 +272,17 @@ test("formats a year period as the concrete year", () => {
   assert.equal(card._formatDateRange(), "2025");
 });
 
+test("resets the date while preserving the selected period unit", async () => {
+  const card = new Card();
+  card._active = "week";
+  const periods = [];
+  card._setPeriod = async (period) => periods.push(period);
+
+  await card._resetToCurrentPeriod();
+
+  assert.deepEqual(periods, ["week"]);
+});
+
 test("shifts the selected period backward and forward", async () => {
   const card = new Card();
   card._hass = createHass();
