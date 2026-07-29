@@ -200,7 +200,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /30px minmax\(76px, \.8fr\) minmax\(92px, 1\.2fr\) 30px/
+    /44px minmax\(76px, \.8fr\) minmax\(92px, 1\.2fr\) 44px/
   );
   assert.match(
     card.shadowRoot.innerHTML,
