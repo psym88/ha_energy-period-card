@@ -200,7 +200,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /44px minmax\(76px, \.8fr\) minmax\(92px, 1\.2fr\) 44px/
+    /30px minmax\(76px, \.8fr\) minmax\(92px, 1\.2fr\) 30px/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -238,7 +238,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(44px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\);[\s\S]*?background: var\(--card-background-color\)/
+    /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(30px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\);[\s\S]*?background: var\(--card-background-color\)/
   );
 });
 
