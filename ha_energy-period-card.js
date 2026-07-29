@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.0-beta.2";
+const CARD_VERSION = "1.1.0-beta.3";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -41,10 +41,6 @@ const RELATIVE_PERIOD_KEYS = Object.freeze({
     "-1": "ui.components.selectors.period.periods.last_month",
     0: "ui.components.selectors.period.periods.this_month",
     1: "ui.components.selectors.period.periods.next_month",
-  }),
-  year: Object.freeze({
-    "-1": "ui.components.selectors.period.periods.last_year",
-    0: "ui.components.selectors.period.periods.this_year",
   }),
 });
 
@@ -609,21 +605,6 @@ class HaEnergyPeriodCard extends HTMLElement {
           font-weight: var(--ha-font-weight-medium, 500);
           line-height: var(--ha-line-height-condensed, 1.3);
         }
-        select {
-          appearance: auto;
-          width: 100%;
-          border: 1px solid var(--divider-color);
-          border-radius: var(--ha-energy-period-card-select-radius);
-          padding: var(--ha-space-2, 8px) var(--ha-space-4, 16px);
-          color: var(--ha-energy-period-card-select-color);
-          background: var(--ha-energy-period-card-select-background);
-          font: inherit;
-          font-size: var(--ha-font-size-l, 16px);
-          line-height: var(--ha-line-height-normal, 1.4);
-          text-align: center;
-          text-align-last: center;
-          cursor: pointer;
-        }
         select option {
           text-align: center;
         }
@@ -696,8 +677,15 @@ class HaEnergyPeriodCard extends HTMLElement {
           border: 0;
           border-radius: 0;
           padding: 0 var(--ha-space-5, 20px) 0 var(--ha-space-2, 8px);
+          color: var(--ha-energy-period-card-select-color);
           background: transparent;
           background-image: none;
+          font: inherit;
+          font-size: var(--ha-font-size-l, 16px);
+          line-height: var(--ha-line-height-normal, 1.4);
+          text-align: center;
+          text-align-last: center;
+          cursor: pointer;
         }
         .date-navigation select:focus-visible {
           outline-offset: -2px;

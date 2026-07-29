@@ -325,6 +325,9 @@ test("formats a German date range on two lines", () => {
 test("formats a year period as the concrete year", () => {
   const card = new Card();
   card._hass = createHass();
+  card._hass.localize = () => {
+    throw new Error("Year formatting must not request a relative label");
+  };
   card._active = "year";
   card._offset = -1;
   card._rangeStart = new Date(2025, 0, 1);
@@ -382,8 +385,8 @@ test("starts a new card instance on Today", async () => {
     setPeriod: async (period) => {
       selectedPeriods.push(period);
       return {
-      start: new Date(2026, 6, 29, 0, 0, 0, 0),
-      end: new Date(2026, 6, 29, 23, 59, 59, 999),
+        start: new Date(2026, 6, 29, 0, 0, 0, 0),
+        end: new Date(2026, 6, 29, 23, 59, 59, 999),
       };
     },
   };

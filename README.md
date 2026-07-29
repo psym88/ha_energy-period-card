@@ -63,9 +63,9 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 
 | Variable | Purpose |
 | --- | --- |
-| `--ha-energy-period-card-select-background` | Dropdown background |
+| `--ha-energy-period-card-select-background` | Segmented control background |
 | `--ha-energy-period-card-select-color` | Dropdown text |
-| `--ha-energy-period-card-select-radius` | Dropdown corner radius |
+| `--ha-energy-period-card-select-radius` | Segmented control corner radius |
 
 Example:
 
