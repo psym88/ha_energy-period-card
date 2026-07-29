@@ -88,17 +88,16 @@ Home Assistant does not expose a public API for changing the Energy dashboard pe
 
 ## Manual installation
 
-Copy `dist/ha_energy-period-card.js` to `/config/www/ha_energy-period-card.js`, then register `/local/ha_energy-period-card.js` as a JavaScript module.
+Copy `ha_energy-period-card.js` to `/config/www/ha_energy-period-card.js`, then register `/local/ha_energy-period-card.js` as a JavaScript module.
 
 ## Development
 
 ```bash
-npm run build
 npm run check
 npm test
 ```
 
-Edit `src/ha_energy-period-card.js`, then run the build command to regenerate the HACS bundle in `dist/`.
+Edit `ha_energy-period-card.js` directly. The card is intentionally kept as a single dependency-free file and requires no build step.
 
 ## Language policy
 

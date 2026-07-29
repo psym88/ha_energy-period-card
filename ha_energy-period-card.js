@@ -1,12 +1,6 @@
-/**
- * HA Energy Period Card
- * https://github.com/psym88/ha_energy-period-card
- * Generated from src/ha_energy-period-card.js. Do not edit directly.
- */
-
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.0";
+const CARD_VERSION = "1.1.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;

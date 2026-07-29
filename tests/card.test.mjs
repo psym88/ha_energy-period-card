@@ -60,7 +60,7 @@ globalThis.localStorage = {
   setItem() {},
 };
 
-await import("../src/ha_energy-period-card.js");
+await import("../ha_energy-period-card.js");
 
 const Card = registry.get("ha_energy-period-card");
 
