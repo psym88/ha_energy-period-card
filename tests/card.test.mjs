@@ -241,7 +241,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(44px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\)/
+    /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(44px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\);[\s\S]*?background: var\(--card-background-color\)/
   );
 });
 
