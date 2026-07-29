@@ -194,11 +194,13 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Year<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, /class="date-range"/);
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /<button[\s\S]*?class="date-range"[\s\S]*?data-today/
+  );
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
-  assert.doesNotMatch(card.shadowRoot.innerHTML, /data-today/);
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
     card.shadowRoot.innerHTML,

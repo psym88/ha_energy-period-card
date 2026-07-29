@@ -537,6 +537,7 @@ class HaEnergyPeriodCard extends HTMLElement {
     if (dateRange) {
       dateRange.textContent = this._formatDateRange();
       dateRange.title = this._formatExactDateRange();
+      dateRange.disabled = this._busy || !this._hass;
     }
     this.shadowRoot
       .querySelectorAll("button[data-shift]")
@@ -609,10 +610,24 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .date-range {
           min-width: 0;
+          border: 0;
+          padding: 0;
           color: var(--secondary-text-color);
+          background: transparent;
+          font: inherit;
           font-size: var(--ha-font-size-m, 14px);
           line-height: var(--ha-line-height-normal, 1.4);
           text-align: center;
+          cursor: pointer;
+        }
+        .date-range:focus-visible {
+          border-radius: var(--ha-button-border-radius, 999px);
+          outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
+          outline-offset: 2px;
+        }
+        .date-range:disabled {
+          cursor: default;
+          opacity: var(--disabled-opacity, .55);
         }
         .date-navigation {
           display: grid;
@@ -622,7 +637,7 @@ class HaEnergyPeriodCard extends HTMLElement {
           min-height: var(--ha-space-8, 32px);
           margin-top: var(--ha-space-2, 8px);
         }
-        .date-navigation button {
+        .date-navigation button[data-shift] {
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -637,14 +652,14 @@ class HaEnergyPeriodCard extends HTMLElement {
           line-height: 1;
           cursor: pointer;
         }
-        .date-navigation button:hover:not(:disabled) {
+        .date-navigation button[data-shift]:hover:not(:disabled) {
           background: var(--divider-color);
         }
-        .date-navigation button:focus-visible {
+        .date-navigation button[data-shift]:focus-visible {
           outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
           outline-offset: 2px;
         }
-        .date-navigation button:disabled {
+        .date-navigation button[data-shift]:disabled {
           cursor: default;
           opacity: var(--disabled-opacity, .55);
         }
@@ -682,11 +697,14 @@ class HaEnergyPeriodCard extends HTMLElement {
             title="${escapeHtml(previousLabel)}"
             ${this._busy || !this._hass || !this._active ? "disabled" : ""}
           >‹</button>
-          <div
+          <button
+            type="button"
             class="date-range"
+            data-today
             aria-live="polite"
             title="${escapeHtml(this._formatExactDateRange())}"
-          >${escapeHtml(this._formatDateRange())}</div>
+            ${this._busy || !this._hass ? "disabled" : ""}
+          >${escapeHtml(this._formatDateRange())}</button>
           <button
             type="button"
             data-shift="next"
@@ -718,6 +736,9 @@ class HaEnergyPeriodCard extends HTMLElement {
           this._shiftPeriod(button.dataset.shift === "next")
         )
       );
+    this.shadowRoot
+      .querySelector?.("button[data-today]")
+      ?.addEventListener("click", () => this._setPeriod("today"));
     this._rendered = true;
     this._updateControl();
   }
