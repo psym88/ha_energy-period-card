@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.1.4";
+const CARD_VERSION = "3.2.0";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -622,8 +622,8 @@ class HaEnergyPeriodCard extends HTMLElement {
         .date-range {
           min-width: 0;
           border: 0;
-          padding: 0;
-          color: var(--secondary-text-color);
+          padding: 0 var(--ha-space-2, 8px);
+          color: var(--primary-text-color);
           background: transparent;
           font: inherit;
           font-size: var(--ha-font-size-m, 14px);
@@ -631,10 +631,12 @@ class HaEnergyPeriodCard extends HTMLElement {
           text-align: center;
           cursor: pointer;
         }
+        .date-range:hover:not(:disabled) {
+          background: var(--divider-color);
+        }
         .date-range:focus-visible {
-          border-radius: var(--ha-button-border-radius, 999px);
           outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
-          outline-offset: 2px;
+          outline-offset: -2px;
         }
         .date-range:disabled {
           cursor: default;
@@ -642,20 +644,21 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .date-navigation {
           display: grid;
-          grid-template-columns: auto minmax(0, 1fr) auto;
-          align-items: center;
-          gap: var(--ha-space-2, 8px);
-          min-height: var(--ha-space-8, 32px);
+          grid-template-columns: 44px minmax(0, 1fr) 44px;
+          min-height: 44px;
           margin-top: var(--ha-space-2, 8px);
+          overflow: hidden;
+          border: 1px solid var(--divider-color);
+          border-radius: var(--ha-energy-period-card-select-radius);
+          background: var(--ha-energy-period-card-select-background);
         }
         .date-navigation button[data-shift] {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: var(--ha-space-8, 32px);
-          height: var(--ha-space-8, 32px);
+          width: 44px;
+          height: 44px;
           border: 0;
-          border-radius: 50%;
           color: var(--primary-text-color);
           background: transparent;
           font: inherit;
@@ -663,12 +666,18 @@ class HaEnergyPeriodCard extends HTMLElement {
           line-height: 1;
           cursor: pointer;
         }
+        .date-navigation button[data-shift="previous"] {
+          border-right: 1px solid var(--divider-color);
+        }
+        .date-navigation button[data-shift="next"] {
+          border-left: 1px solid var(--divider-color);
+        }
         .date-navigation button[data-shift]:hover:not(:disabled) {
           background: var(--divider-color);
         }
         .date-navigation button[data-shift]:focus-visible {
           outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
-          outline-offset: 2px;
+          outline-offset: -2px;
         }
         .date-navigation button[data-shift]:disabled {
           cursor: default;

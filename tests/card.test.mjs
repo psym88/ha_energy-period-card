@@ -201,6 +201,18 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /grid-template-columns: 44px minmax\(0, 1fr\) 44px/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /button\[data-shift="previous"\][\s\S]*?border-right: 1px solid/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /button\[data-shift="next"\][\s\S]*?border-left: 1px solid/
+  );
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
     card.shadowRoot.innerHTML,
