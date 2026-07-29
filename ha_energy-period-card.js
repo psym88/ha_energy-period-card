@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.0.0";
+const CARD_VERSION = "3.0.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -400,6 +400,10 @@ class HaEnergyPeriodCard extends HTMLElement {
 
   async _setPeriod(period) {
     if (!PERIODS.includes(period) || this._busy) return;
+    const previousPeriod = this._active;
+    const previousOffset = this._offset;
+    this._active = period;
+    this._offset = 0;
     this._justClickedUntil = Date.now() + CLICK_GUARD_MS;
     this._setBusy(true);
 
@@ -411,12 +415,12 @@ class HaEnergyPeriodCard extends HTMLElement {
         this._config.collection_key
       );
       this._clearError();
-      this._active = period;
-      this._offset = 0;
       this._rangeStart = new Date(range.start);
       this._rangeEnd = new Date(range.end);
       this._updateControl();
     } catch (error) {
+      this._active = previousPeriod;
+      this._offset = previousOffset;
       this._setError(error);
     } finally {
       this._setBusy(false);
@@ -494,8 +498,10 @@ class HaEnergyPeriodCard extends HTMLElement {
     if (!this._rendered) return;
     const select = this.shadowRoot.querySelector?.("select[data-period]");
     if (select) {
-      select.value = this._active || "";
-      select.disabled = this._busy || !this._hass;
+      const value = this._active || "today";
+      if (select.value !== value) select.value = value;
+      const disabled = this._busy || !this._hass;
+      if (select.disabled !== disabled) select.disabled = disabled;
       const dayOption = select.querySelector?.('option[value="today"]');
       if (dayOption) dayOption.textContent = this._localizePeriod("today");
     }
@@ -661,7 +667,6 @@ class HaEnergyPeriodCard extends HTMLElement {
           aria-label="Energy period"
           ${this._busy || !this._hass ? "disabled" : ""}
         >
-          <option value="" hidden>Select period</option>
           ${PERIODS.map(
             (period) =>
               `<option value="${period}" ${
