@@ -1,6 +1,6 @@
 # HA Energy Period Card
 
-A compact Home Assistant dashboard card with a dropdown for selecting the current Energy period: Today, Week, Month, or Year.
+A compact Home Assistant dashboard card with a dropdown for selecting the Energy period unit: Day, Week, Month, or Year.
 
 ![HA Energy Period Card preview](images/preview.svg)
 
@@ -9,7 +9,7 @@ A compact Home Assistant dashboard card with a dropdown for selecting the curren
 - Uses Home Assistant's native Energy period
 - Synchronizes with other cards using the same Energy data collection
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
-- Localizes dropdown labels through Home Assistant
+- Uses Home Assistant's neutral localized labels for Day, Week, Month, and Year
 - Shows the active date range below the period dropdown
 - Navigates backward or forward by one selected period with date arrows
 - Includes a built-in visual configuration form

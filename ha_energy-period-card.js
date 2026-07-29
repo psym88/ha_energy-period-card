@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "2.1.0";
+const CARD_VERSION = "2.1.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -14,8 +14,14 @@ const PERIOD_PRESET_KEYS = Object.freeze({
   month: "this_month",
   year: "this_year",
 });
+const PERIOD_LABEL_KEYS = Object.freeze({
+  today: "day",
+  week: "week",
+  month: "month",
+  year: "year",
+});
 const PERIOD_LABELS = Object.freeze({
-  today: "Today",
+  today: "Day",
   week: "Week",
   month: "Month",
   year: "Year",
@@ -457,10 +463,10 @@ class HaEnergyPeriodCard extends HTMLElement {
   }
 
   _localizePeriod(period) {
-    const presetKey = PERIOD_PRESET_KEYS[period];
+    const labelKey = PERIOD_LABEL_KEYS[period];
     return (
       this._hass?.localize?.(
-        `ui.components.date-range-picker.ranges.${presetKey}`
+        `ui.panel.lovelace.editor.card.statistics-graph.periods.${labelKey}`
       ) ||
       PERIOD_LABELS[period] ||
       period

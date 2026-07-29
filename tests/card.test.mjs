@@ -79,12 +79,29 @@ function createHass(language = "en") {
       this_year: "Localized year",
     },
   };
+  const periodLabels = {
+    en: {
+      day: "Day",
+      week: "Week",
+      month: "Month",
+      year: "Year",
+    },
+    custom: {
+      day: "Localized day",
+      week: "Localized week",
+      month: "Localized month",
+      year: "Localized year",
+    },
+  };
 
   return {
     language,
     locale: { language },
     localize(key) {
       const range = key.split(".").at(-1);
+      if (key.includes("statistics-graph.periods")) {
+        return periodLabels[language]?.[range] || "";
+      }
       return labels[language]?.[range] || "";
     },
   };
@@ -142,7 +159,7 @@ test("initializes when Home Assistant is assigned after configuration", () => {
 test("uses Home Assistant translations with English fallbacks", () => {
   const card = new Card();
   card._hass = createHass("custom");
-  assert.equal(card._localizePeriod("today"), "Localized today");
+  assert.equal(card._localizePeriod("today"), "Localized day");
   assert.equal(card._localizePeriod("week"), "Localized week");
 
   card._hass = createHass("unsupported");
@@ -162,10 +179,10 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /<option value="week"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="month"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="year"/);
-  assert.match(card.shadowRoot.innerHTML, />Today<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />This week<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />This month<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />This year<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Day<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Year<\/option>/);
   assert.match(card.shadowRoot.innerHTML, /class="date-range"/);
   assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
