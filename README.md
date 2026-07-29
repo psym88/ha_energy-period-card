@@ -18,6 +18,8 @@ A compact Home Assistant dashboard card for selecting the current Energy period:
 
 ## HACS installation
 
+[![Open your Home Assistant instance and open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=psym88&repository=ha_energy-period-card&category=plugin)
+
 1. Open HACS and select **Custom repositories** from the three-dot menu.
 2. Add `https://github.com/psym88/ha_energy-period-card` with the **Dashboard** category.
 3. Install **HA Energy Period Card**.
