@@ -1,3 +1,4 @@
+// HA Energy Period Card
 class SimpleEnergyPeriodCard extends HTMLElement {
   constructor() {
     super();

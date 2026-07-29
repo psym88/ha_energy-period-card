@@ -54,7 +54,7 @@ npm run build
 npm run check
 ```
 
-Edit `src/simple-energy-period-card.js`, then run the build command to regenerate the HACS bundle in `dist/`.
+Edit `src/ha_energy-period-card.js`, then run the build command to regenerate the HACS bundle in `dist/`.
 
 ## Language policy
 

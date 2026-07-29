@@ -1,9 +1,10 @@
 /**
  * HA Energy Period Card
  * https://github.com/psym88/ha_energy-period-card
- * Generated from src/simple-energy-period-card.js. Do not edit directly.
+ * Generated from src/ha_energy-period-card.js. Do not edit directly.
  */
 
+// HA Energy Period Card
 class SimpleEnergyPeriodCard extends HTMLElement {
   constructor() {
     super();
