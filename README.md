@@ -62,7 +62,7 @@ The four period labels use Home Assistant's built-in date-range translations for
 
 ## Theme variables
 
-The card follows Home Assistant's semantic color, typography, spacing, animation, and button-radius variables with legacy fallbacks. Themes can override these card-specific variables:
+The card prioritizes Home Assistant's user-configurable theme colors and uses semantic color variables as fallbacks. It also follows Home Assistant's typography, spacing, animation, and button-radius variables. Themes can override these card-specific variables:
 
 | Variable | Purpose |
 | --- | --- |

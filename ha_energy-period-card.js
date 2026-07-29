@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.1";
+const CARD_VERSION = "1.1.2";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -454,13 +454,13 @@ class HaEnergyPeriodCard extends HTMLElement {
           display: block;
           container-type: inline-size;
           --ha-energy-period-card-active-background:
-            var(--ha-color-primary-40, var(--primary-color));
+            var(--primary-color, var(--ha-color-primary-40));
           --ha-energy-period-card-active-color:
-            var(--ha-color-on-primary-loud, var(--text-primary-color, #fff));
+            var(--text-primary-color, var(--ha-color-on-primary-loud, #fff));
           --ha-energy-period-card-button-background:
-            var(--ha-color-surface-low, var(--secondary-background-color));
+            var(--secondary-background-color, var(--ha-color-surface-low));
           --ha-energy-period-card-button-background-hover:
-            var(--ha-color-surface-lower, var(--ha-color-primary-95, var(--divider-color)));
+            var(--divider-color, var(--ha-color-surface-lower, var(--ha-color-primary-95)));
           --ha-energy-period-card-button-color: var(--primary-text-color);
           --ha-energy-period-card-button-radius:
             var(--ha-button-border-radius, 999px);
@@ -509,7 +509,7 @@ class HaEnergyPeriodCard extends HTMLElement {
           transform: scale(.97);
         }
         button:focus-visible {
-          outline: 2px solid var(--ha-color-primary-50, var(--primary-color));
+          outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
           outline-offset: 2px;
         }
         button.active {

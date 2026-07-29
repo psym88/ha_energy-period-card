@@ -161,6 +161,14 @@ test("renders accessible controls and theme extension points", () => {
     card.shadowRoot.innerHTML,
     /--ha-energy-period-card-active-background/
   );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /var\(--primary-color, var\(--ha-color-primary-40\)\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
+  );
   assert.match(card.shadowRoot.innerHTML, /@container \(max-width: 360px\)/);
 });
 
