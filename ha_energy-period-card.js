@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.1.2";
+const CARD_VERSION = "3.1.3";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -487,6 +487,12 @@ class HaEnergyPeriodCard extends HTMLElement {
 
   _formatExactDateRange() {
     if (!this._rangeStart || !this._rangeEnd) return "";
+    if (this._active === "year") {
+      return new Intl.DateTimeFormat(this._getLocale(), {
+        year: "numeric",
+        timeZone: this._hass?.config?.time_zone,
+      }).format(this._rangeStart);
+    }
     const formatter = new Intl.DateTimeFormat(this._getLocale(), {
       day: "2-digit",
       month: "2-digit",
@@ -502,6 +508,7 @@ class HaEnergyPeriodCard extends HTMLElement {
   }
 
   _formatDateRange() {
+    if (this._active === "year") return this._formatExactDateRange();
     const key = RELATIVE_PERIOD_KEYS[this._active]?.[this._offset];
     const localized = key ? this._hass?.localize?.(key) : "";
     return localized || this._formatExactDateRange();

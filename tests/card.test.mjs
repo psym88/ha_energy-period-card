@@ -261,6 +261,17 @@ test("formats a day fallback as one date instead of a date range", () => {
   assert.equal(card._formatDateRange(), "07/27/2026");
 });
 
+test("formats a year period as the concrete year", () => {
+  const card = new Card();
+  card._hass = createHass();
+  card._active = "year";
+  card._offset = -1;
+  card._rangeStart = new Date(2025, 0, 1);
+  card._rangeEnd = new Date(2025, 11, 31, 23, 59, 59);
+
+  assert.equal(card._formatDateRange(), "2025");
+});
+
 test("shifts the selected period backward and forward", async () => {
   const card = new Card();
   card._hass = createHass();
