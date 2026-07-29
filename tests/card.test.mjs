@@ -166,6 +166,17 @@ test("uses Home Assistant translations with English fallbacks", () => {
   assert.equal(card._localizePeriod("month"), "Month");
 });
 
+test("uses Today for the current day and Day after navigation", () => {
+  const card = new Card();
+  card._hass = createHass("custom");
+  card._active = "today";
+
+  assert.equal(card._localizePeriod("today"), "Localized today");
+
+  card._preservedRangeKey = "shifted-range";
+  assert.equal(card._localizePeriod("today"), "Localized day");
+});
+
 test("renders an accessible dropdown, date range, and theme extension points", () => {
   const card = new Card();
   card._hass = createHass();

@@ -10,6 +10,7 @@ A compact Home Assistant dashboard card with a dropdown for selecting the Energy
 - Synchronizes with other cards using the same Energy data collection
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
 - Uses Home Assistant's neutral localized labels for Day, Week, Month, and Year
+- Shows Home Assistant's localized "Today" label for the current day and switches to the neutral "Day" label after navigation
 - Shows the active date range below the period dropdown
 - Navigates backward or forward by one selected period with date arrows
 - Includes a built-in visual configuration form
