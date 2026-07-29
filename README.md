@@ -8,7 +8,12 @@ A compact Home Assistant dashboard card for selecting the current Energy period:
 
 - Uses Home Assistant's native Energy period
 - Synchronizes with other cards using the same Energy data collection
-- Honors the first weekday configured in Home Assistant
+- Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
+- Localizes period labels through Home Assistant with English fallbacks
+- Includes a built-in visual configuration form
+- Supports keyboard navigation, screen readers, and reduced-motion preferences
+- Adapts from four columns to two or one on narrow cards
+- Detects incompatible Home Assistant Energy selector changes and shows an error
 - Can be displayed without an outer card frame
 
 ## HACS installation
@@ -32,6 +37,8 @@ If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-peri
 
 > **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
 
+The card supports Home Assistant's visual card editor. YAML configuration remains available:
+
 ```yaml
 type: custom:ha_energy-period-card
 collection_key: energy_1
@@ -47,6 +54,38 @@ show_card: true
 
 The `collection_key` must match the associated Energy date selection. A typical value is `energy_1`.
 
+## Localization
+
+The four period labels use Home Assistant's built-in date-range translations for the active user language. English is used only when Home Assistant does not provide a translation.
+
+## Theme variables
+
+The card follows Home Assistant's semantic color, typography, spacing, animation, and button-radius variables with legacy fallbacks. Themes can override these card-specific variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `--ha-energy-period-card-active-background` | Selected period background |
+| `--ha-energy-period-card-active-color` | Selected period text |
+| `--ha-energy-period-card-button-background` | Inactive button background |
+| `--ha-energy-period-card-button-background-hover` | Inactive hover background |
+| `--ha-energy-period-card-button-color` | Inactive button text |
+| `--ha-energy-period-card-button-radius` | Button corner radius |
+
+Example:
+
+```yaml
+card_mod:
+  style: |
+    ha-card {
+      --ha-energy-period-card-active-background: var(--accent-color);
+      --ha-energy-period-card-button-radius: 12px;
+    }
+```
+
+## Compatibility
+
+Home Assistant does not expose a public API for changing the Energy dashboard period. The card therefore uses the internal Energy period selector through a compatibility adapter. The adapter validates the required properties and methods and displays an error when a Home Assistant update introduces an incompatible change.
+
 ## Manual installation
 
 Copy `dist/ha_energy-period-card.js` to `/config/www/ha_energy-period-card.js`, then register `/local/ha_energy-period-card.js` as a JavaScript module.
@@ -56,6 +95,7 @@ Copy `dist/ha_energy-period-card.js` to `/config/www/ha_energy-period-card.js`, 
 ```bash
 npm run build
 npm run check
+npm test
 ```
 
 Edit `src/ha_energy-period-card.js`, then run the build command to regenerate the HACS bundle in `dist/`.

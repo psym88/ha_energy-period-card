@@ -1,10 +1,11 @@
 {
   "name": "ha_energy-period-card",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "private": true,
   "description": "Energy period selector card for Home Assistant",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "npm run build && node --check dist/ha_energy-period-card.js"
+    "test": "node tests/card.test.mjs",
+    "check": "npm run build && node --check dist/ha_energy-period-card.js && npm test"
   }
 }
