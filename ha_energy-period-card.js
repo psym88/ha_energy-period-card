@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.0.1";
+const CARD_VERSION = "1.1.0-beta.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -669,15 +669,31 @@ class HaEnergyPeriodCard extends HTMLElement {
           border-radius: var(--ha-energy-period-card-select-radius);
           background: var(--ha-energy-period-card-select-background);
         }
+        .period-select {
+          position: relative;
+          min-width: 0;
+          border-right: 1px solid var(--divider-color);
+        }
+        .period-select::after {
+          position: absolute;
+          top: 50%;
+          right: var(--ha-space-2, 8px);
+          width: 6px;
+          height: 6px;
+          border-right: 2px solid var(--secondary-text-color);
+          border-bottom: 2px solid var(--secondary-text-color);
+          content: "";
+          pointer-events: none;
+          transform: translateY(-70%) rotate(45deg);
+        }
         .date-navigation select {
           appearance: none;
           -webkit-appearance: none;
           min-width: 0;
           height: 100%;
           border: 0;
-          border-right: 1px solid var(--divider-color);
           border-radius: 0;
-          padding: 0 var(--ha-space-2, 8px);
+          padding: 0 var(--ha-space-5, 20px) 0 var(--ha-space-2, 8px);
           background: transparent;
           background-image: none;
         }
@@ -692,7 +708,7 @@ class HaEnergyPeriodCard extends HTMLElement {
           height: 100%;
           border: 0;
           color: var(--primary-text-color);
-          background: transparent;
+          background: var(--secondary-background-color);
           font: inherit;
           font-size: 24px;
           line-height: 1;
@@ -736,18 +752,20 @@ class HaEnergyPeriodCard extends HTMLElement {
             title="${escapeHtml(previousLabel)}"
             ${this._busy || !this._hass || !this._active ? "disabled" : ""}
           >‹</button>
-          <select
-            data-period
-            aria-label="Energy period"
-            ${this._busy || !this._hass ? "disabled" : ""}
-          >
-            ${PERIODS.map(
-              (period) =>
-                `<option value="${period}" ${
-                  period === this._active ? "selected" : ""
-                }>${escapeHtml(labels[period])}</option>`
-            ).join("")}
-          </select>
+          <div class="period-select">
+            <select
+              data-period
+              aria-label="Energy period"
+              ${this._busy || !this._hass ? "disabled" : ""}
+            >
+              ${PERIODS.map(
+                (period) =>
+                  `<option value="${period}" ${
+                    period === this._active ? "selected" : ""
+                  }>${escapeHtml(labels[period])}</option>`
+              ).join("")}
+            </select>
+          </div>
           <button
             type="button"
             class="date-range"

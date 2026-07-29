@@ -208,6 +208,14 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
+    /\.period-select::after \{[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?rotate\(45deg\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-navigation button\[data-shift\] \{[\s\S]*?background: var\(--secondary-background-color\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
     /<div class="date-navigation">[\s\S]*?data-shift="previous"[\s\S]*?<select[\s\S]*?data-period[\s\S]*?class="date-range"[\s\S]*?data-shift="next"/
   );
   assert.match(
