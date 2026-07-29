@@ -19,7 +19,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
 
   setConfig(config) {
     if (!config.collection_key?.startsWith("energy_")) {
-      throw new Error("collection_key ist erforderlich und muss mit energy_ beginnen");
+      throw new Error("collection_key is required and must start with energy_");
     }
     this._config = { title: "", show_card: true, ...config };
     this._render();
@@ -44,7 +44,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
 
   getCardSize() { return 1; }
 
-  // --- Native Selector ---
+  // --- Native selector ---
 
   async _ensureNativeSelector() {
     if (this._periodSelector) return;
@@ -69,7 +69,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
     this._schedulSync();
   }
 
-  // --- Sync ---
+  // --- Synchronization ---
 
   _schedulSync() {
     clearTimeout(this._syncTimer);
@@ -90,7 +90,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
     }
   }
 
-  // --- Period setzen ---
+  // --- Set period ---
 
   async _setPeriod(period) {
     this._justClickedUntil = Date.now() + 1000;
@@ -133,7 +133,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
     this._periodSelector._updateCollectionPeriod();
   }
 
-  // --- Periode erkennen ---
+  // --- Detect period ---
 
   _detectPeriod(start, end) {
     const now = new Date();
@@ -157,7 +157,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
     return undefined;
   }
 
-  // --- Datums-Helfer ---
+  // --- Date helpers ---
 
   _startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   _endOfDay(d)   { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999); }
@@ -174,7 +174,7 @@ class SimpleEnergyPeriodCard extends HTMLElement {
     return d;
   }
 
-  // --- Render ---
+  // --- Rendering ---
 
   _updateActiveButton() {
     if (!this._rendered) return;
@@ -204,10 +204,10 @@ class SimpleEnergyPeriodCard extends HTMLElement {
       <${tag} class="wrapper">
         ${this._config.title ? `<div class="title">${this._config.title}</div>` : ""}
         <div class="buttons">
-          <button data-period="today">Heute</button>
-          <button data-period="week">Woche</button>
-          <button data-period="month">Monat</button>
-          <button data-period="year">Jahr</button>
+          <button data-period="today">Today</button>
+          <button data-period="week">Week</button>
+          <button data-period="month">Month</button>
+          <button data-period="year">Year</button>
         </div>
       </${tag}>`;
 
@@ -226,5 +226,5 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "simple-energy-period-card",
   name: "Simple Energy Period Card",
-  description: "Buttons für Heute, Woche, Monat und Jahr für eine Energy collection_key",
+  description: "Buttons for Today, Week, Month, and Year for an Energy collection_key",
 });

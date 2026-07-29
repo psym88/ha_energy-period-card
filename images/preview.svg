@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260">
   <rect width="900" height="260" rx="28" fill="#101820"/>
   <rect x="48" y="44" width="804" height="172" rx="20" fill="#202b35"/>
-  <text x="78" y="87" fill="#f2f5f8" font-family="Arial, sans-serif" font-size="24" font-weight="700">Zeitraum</text>
+  <text x="78" y="87" fill="#f2f5f8" font-family="Arial, sans-serif" font-size="24" font-weight="700">Period</text>
   <g transform="translate(78 116)" font-family="Arial, sans-serif" font-size="18" text-anchor="middle">
     <rect width="164" height="58" rx="29" fill="#3b4650"/>
-    <text x="82" y="36" fill="#f2f5f8">Heute</text>
+    <text x="82" y="36" fill="#f2f5f8">Today</text>
     <g transform="translate(186)">
       <rect width="164" height="58" rx="29" fill="#03a9f4"/>
-      <text x="82" y="36" fill="#fff" font-weight="700">Woche</text>
+      <text x="82" y="36" fill="#fff" font-weight="700">Week</text>
     </g>
     <g transform="translate(372)">
       <rect width="164" height="58" rx="29" fill="#3b4650"/>
-      <text x="82" y="36" fill="#f2f5f8">Monat</text>
+      <text x="82" y="36" fill="#f2f5f8">Month</text>
     </g>
     <g transform="translate(558)">
       <rect width="164" height="58" rx="29" fill="#3b4650"/>
-      <text x="82" y="36" fill="#f2f5f8">Jahr</text>
+      <text x="82" y="36" fill="#f2f5f8">Year</text>
     </g>
   </g>
 </svg>

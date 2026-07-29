@@ -1,59 +1,65 @@
 # HA Energy Period Card
 
-Eine kompakte Home-Assistant-Dashboard-Karte zur Auswahl des aktuellen Energy-Zeitraums: Heute, Woche, Monat oder Jahr.
+A compact Home Assistant dashboard card for selecting the current Energy period: Today, Week, Month, or Year.
 
-![Vorschau der HA Energy Period Card](images/preview.svg)
+![HA Energy Period Card preview](images/preview.svg)
 
-## Funktionen
+## Features
 
-- Verwendet Home Assistants nativen Energy-Zeitraum
-- Synchronisiert sich mit anderen Karten derselben Energy-Datensammlung
-- Berücksichtigt den in Home Assistant eingestellten ersten Wochentag
-- Optional ohne äußeren Kartenrahmen
+- Uses Home Assistant's native Energy period
+- Synchronizes with other cards using the same Energy data collection
+- Honors the first weekday configured in Home Assistant
+- Can be displayed without an outer card frame
 
-## Installation über HACS
+## HACS installation
 
-1. Öffne in HACS das Drei-Punkte-Menü und **Benutzerdefinierte Repositories**.
-2. Füge `https://github.com/psym88/ha_energy-period-card` als Typ **Dashboard** hinzu.
-3. Installiere **HA Energy Period Card**.
-4. Lade Home Assistant beziehungsweise den Browser-Cache neu.
+1. Open HACS and select **Custom repositories** from the three-dot menu.
+2. Add `https://github.com/psym88/ha_energy-period-card` with the **Dashboard** category.
+3. Install **HA Energy Period Card**.
+4. Reload Home Assistant and clear the browser cache if necessary.
 
-HACS registriert normalerweise automatisch die Ressource:
+HACS normally registers this resource automatically:
 
 ```text
 /hacsfiles/ha_energy-period-card/ha_energy-period-card.js
 ```
 
-Falls nötig, füge sie unter **Einstellungen → Dashboards → Ressourcen** als JavaScript-Modul hinzu.
+If it is missing, add it as a JavaScript module under **Settings → Dashboards → Resources**.
 
-## Konfiguration
+## Configuration
 
 ```yaml
 type: custom:simple-energy-period-card
 collection_key: energy_1
-title: Zeitraum
+title: Period
 show_card: true
 ```
 
-| Option | Erforderlich | Standard | Beschreibung |
+| Option | Required | Default | Description |
 | --- | --- | --- | --- |
-| `collection_key` | Ja | – | Schlüssel der Energy-Datensammlung; muss mit `energy_` beginnen |
-| `title` | Nein | leer | Überschrift |
-| `show_card` | Nein | `true` | Bei `false` wird kein äußerer `ha-card`-Rahmen dargestellt |
+| `collection_key` | Yes | – | Energy data collection key; it must start with `energy_` |
+| `title` | No | Empty | Card heading |
+| `show_card` | No | `true` | Set to `false` to omit the outer `ha-card` frame |
 
-Der `collection_key` muss mit dem Schlüssel der zugehörigen Energy-Date-Selection übereinstimmen. Ein typischer Wert ist `energy_1`.
+The `collection_key` must match the associated Energy date selection. A typical value is `energy_1`.
 
-## Manuelle Installation
+## Manual installation
 
-Kopiere `dist/ha_energy-period-card.js` nach `/config/www/ha_energy-period-card.js` und registriere `/local/ha_energy-period-card.js` als JavaScript-Modul.
+Copy `dist/ha_energy-period-card.js` to `/config/www/ha_energy-period-card.js`, then register `/local/ha_energy-period-card.js` as a JavaScript module.
 
-## Entwicklung
+## Development
 
 ```bash
 npm run build
 npm run check
 ```
 
-## Lizenz
+Edit `src/simple-energy-period-card.js`, then run the build command to regenerate the HACS bundle in `dist/`.
+
+## Language policy
+
+Repository code, comments, user-facing strings, documentation, examples, release notes, and commit messages must be written in English. See [AGENTS.md](AGENTS.md).
+
+## License
 
 [MIT](LICENSE)
