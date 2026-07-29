@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "2.0.0";
+const CARD_VERSION = "2.0.1";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -409,6 +409,17 @@ class HaEnergyPeriodCard extends HTMLElement {
     return undefined;
   }
 
+  _localizePeriod(period) {
+    const presetKey = PERIOD_PRESET_KEYS[period];
+    return (
+      this._hass?.localize?.(
+        `ui.components.date-range-picker.ranges.${presetKey}`
+      ) ||
+      PERIOD_LABELS[period] ||
+      period
+    );
+  }
+
   _formatDateRange() {
     if (!this._rangeStart || !this._rangeEnd) return "";
     const locale =
@@ -456,6 +467,9 @@ class HaEnergyPeriodCard extends HTMLElement {
 
   _render() {
     const tag = this._config.show_card ? "ha-card" : "div";
+    const labels = Object.fromEntries(
+      PERIODS.map((period) => [period, this._localizePeriod(period)])
+    );
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -530,7 +544,7 @@ class HaEnergyPeriodCard extends HTMLElement {
             (period) =>
               `<option value="${period}" ${
                 period === this._active ? "selected" : ""
-              }>${PERIOD_LABELS[period]}</option>`
+              }>${escapeHtml(labels[period])}</option>`
           ).join("")}
         </select>
         <div class="date-range" aria-live="polite">${escapeHtml(
@@ -568,7 +582,7 @@ if (!window.customCards.some((card) => card.type === "ha_energy-period-card")) {
     type: "ha_energy-period-card",
     name: "HA Energy Period Card",
     description:
-      "Dropdown for selecting the current Home Assistant Energy period.",
+      "Localized dropdown for selecting the current Home Assistant Energy period.",
   });
 }
 

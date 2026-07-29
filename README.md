@@ -9,6 +9,7 @@ A compact Home Assistant dashboard card with a dropdown for selecting the curren
 - Uses Home Assistant's native Energy period
 - Synchronizes with other cards using the same Energy data collection
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
+- Localizes dropdown labels through Home Assistant
 - Shows the active date range below the period dropdown
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
@@ -38,7 +39,7 @@ If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-peri
 
 > **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
 >
-> **Breaking change in v2.0.0:** The four localized buttons were replaced with one dropdown using fixed English period labels.
+> **Breaking change in v2.0.0:** The four localized buttons were replaced with one localized dropdown.
 
 The card supports Home Assistant's visual card editor. YAML configuration remains available:
 
