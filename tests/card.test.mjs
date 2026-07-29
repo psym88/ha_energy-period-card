@@ -195,7 +195,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /<button[\s\S]*?class="date-range"[\s\S]*?data-today/
   );
-  assert.match(card.shadowRoot.innerHTML, /07\/01 - 07\/31\/2026/);
+  assert.match(card.shadowRoot.innerHTML, /07\/01\/2026\s+07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
@@ -276,7 +276,7 @@ test("uses only relative labels supplied by Home Assistant", () => {
   );
 
   card._offset = -2;
-  assert.equal(card._formatDateRange(), "07/29 - 07/29/2026");
+  assert.equal(card._formatDateRange(), "07/29/2026\n07/29/2026");
 });
 
 test("formats a day fallback as one date instead of a date range", () => {
@@ -291,7 +291,7 @@ test("formats a day fallback as one date instead of a date range", () => {
   assert.equal(card._formatDateRange(), "07/27/2026");
 });
 
-test("formats a German date range in a compact form", () => {
+test("formats a German date range on two lines", () => {
   const card = new Card();
   card._hass = createHass("de-CH");
   card._active = "week";
@@ -299,7 +299,7 @@ test("formats a German date range in a compact form", () => {
   card._rangeStart = new Date(2026, 6, 6);
   card._rangeEnd = new Date(2026, 6, 12, 23, 59, 59);
 
-  assert.equal(card._formatDateRange(), "06.07 - 12.07.2026");
+  assert.equal(card._formatDateRange(), "06.07.2026\n12.07.2026");
 });
 
 test("formats a year period as the concrete year", () => {
