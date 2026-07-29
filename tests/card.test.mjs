@@ -186,10 +186,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /<option value="week"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="month"/);
   assert.match(card.shadowRoot.innerHTML, /<option value="year"/);
-  assert.match(
-    card.shadowRoot.innerHTML,
-    /<option value="" hidden>Select period<\/option>/
-  );
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /Select period/);
   assert.match(card.shadowRoot.innerHTML, />Day<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
   assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
@@ -198,7 +195,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /<button[\s\S]*?class="date-range"[\s\S]*?data-today/
   );
-  assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
+  assert.match(card.shadowRoot.innerHTML, /07\/01 - 07\/31\/2026/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="previous"/);
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
@@ -279,7 +276,7 @@ test("uses only relative labels supplied by Home Assistant", () => {
   );
 
   card._offset = -2;
-  assert.equal(card._formatDateRange(), "07/29/2026 – 07/29/2026");
+  assert.equal(card._formatDateRange(), "07/29 - 07/29/2026");
 });
 
 test("formats a day fallback as one date instead of a date range", () => {
@@ -292,6 +289,17 @@ test("formats a day fallback as one date instead of a date range", () => {
   card._rangeEnd = new Date(2026, 6, 27, 23, 59, 59);
 
   assert.equal(card._formatDateRange(), "07/27/2026");
+});
+
+test("formats a German date range in a compact form", () => {
+  const card = new Card();
+  card._hass = createHass("de-CH");
+  card._active = "week";
+  card._offset = -2;
+  card._rangeStart = new Date(2026, 6, 6);
+  card._rangeEnd = new Date(2026, 6, 12, 23, 59, 59);
+
+  assert.equal(card._formatDateRange(), "06.07 - 12.07.2026");
 });
 
 test("formats a year period as the concrete year", () => {

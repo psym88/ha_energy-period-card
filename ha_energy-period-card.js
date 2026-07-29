@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.3.3";
+const CARD_VERSION = "3.4.0";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -506,9 +506,32 @@ class HaEnergyPeriodCard extends HTMLElement {
     if (this._active === "today") {
       return formatter.format(this._rangeStart);
     }
-    return `${formatter.format(this._rangeStart)} – ${formatter.format(
-      this._rangeEnd
-    )}`;
+    const timeZone = this._hass?.config?.time_zone;
+    const startYear = new Intl.DateTimeFormat(this._getLocale(), {
+      year: "numeric",
+      timeZone,
+    }).format(this._rangeStart);
+    const endYear = new Intl.DateTimeFormat(this._getLocale(), {
+      year: "numeric",
+      timeZone,
+    }).format(this._rangeEnd);
+    const compact = (date, includeYear) => {
+      const parts = new Intl.DateTimeFormat(this._getLocale(), {
+        day: "2-digit",
+        month: "2-digit",
+        ...(includeYear ? { year: "numeric" } : {}),
+        timeZone,
+      }).formatToParts(date);
+      return parts
+        .map((part) => part.value)
+        .join("")
+        .trim()
+        .replace(/[.,/\-\s]+$/, "");
+    };
+    return `${compact(
+      this._rangeStart,
+      startYear !== endYear
+    )} - ${compact(this._rangeEnd, true)}`;
   }
 
   _formatDateRange() {
@@ -729,7 +752,6 @@ class HaEnergyPeriodCard extends HTMLElement {
             aria-label="Energy period"
             ${this._busy || !this._hass ? "disabled" : ""}
           >
-            <option value="" hidden>Select period</option>
             ${PERIODS.map(
               (period) =>
                 `<option value="${period}" ${
