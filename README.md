@@ -2,7 +2,7 @@
 
 A compact Home Assistant dashboard card with a dropdown for selecting the Energy period unit: Day, Week, Month, or Year.
 
-![HA Energy Period Card preview](images/preview.svg)
+![HA Energy Period Card preview](images/preview.png)
 
 ## Features
 
