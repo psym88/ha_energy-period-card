@@ -129,6 +129,16 @@ test("uses Home Assistant translations and falls back to English", () => {
   assert.equal(card._localizePeriod("month"), "Month");
 });
 
+test("uses compact German period labels for German locales", () => {
+  const card = new Card();
+  card._hass = createHass("de-CH");
+
+  assert.equal(card._localizePeriod("today"), "Heute");
+  assert.equal(card._localizePeriod("week"), "Woche");
+  assert.equal(card._localizePeriod("month"), "Monat");
+  assert.equal(card._localizePeriod("year"), "Jahr");
+});
+
 test("escapes a configured title before rendering", () => {
   const card = new Card();
   card.setConfig({

@@ -58,7 +58,7 @@ The `collection_key` must match the associated Energy date selection. A typical 
 
 ## Localization
 
-The four period labels use Home Assistant's built-in date-range translations for the active user language. English is used only when Home Assistant does not provide a translation.
+German users see the compact labels `Heute`, `Woche`, `Monat`, and `Jahr`. Other languages use Home Assistant's built-in date-range translations, with English fallbacks when no translation is available.
 
 ## Theme variables
 

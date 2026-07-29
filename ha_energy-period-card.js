@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.2";
+const CARD_VERSION = "1.1.3";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -19,6 +19,12 @@ const PERIOD_FALLBACK_LABELS = Object.freeze({
   week: "Week",
   month: "Month",
   year: "Year",
+});
+const GERMAN_PERIOD_LABELS = Object.freeze({
+  today: "Heute",
+  week: "Woche",
+  month: "Monat",
+  year: "Jahr",
 });
 
 function assertConfig(config) {
@@ -406,6 +412,10 @@ class HaEnergyPeriodCard extends HTMLElement {
   }
 
   _localizePeriod(period) {
+    const language = this._hass?.locale?.language || this._hass?.language || "";
+    if (language.toLowerCase().split(/[-_]/)[0] === "de") {
+      return GERMAN_PERIOD_LABELS[period] || period;
+    }
     const presetKey = PERIOD_PRESET_KEYS[period];
     const translated = this._hass?.localize?.(
       `ui.components.date-range-picker.ranges.${presetKey}`
