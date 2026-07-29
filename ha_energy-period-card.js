@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.0-beta.4";
+const CARD_VERSION = "1.1.0-beta.5";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -655,15 +655,15 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .period-select::after {
           position: absolute;
-          bottom: 4px;
-          left: 50%;
+          top: 50%;
+          right: 10px;
           width: 6px;
           height: 6px;
           border-right: 2px solid var(--secondary-text-color);
           border-bottom: 2px solid var(--secondary-text-color);
           content: "";
           pointer-events: none;
-          transform: translateX(-50%) rotate(45deg);
+          transform: translateY(-70%) rotate(45deg);
         }
         .date-navigation select,
         .date-range {
@@ -679,7 +679,9 @@ class HaEnergyPeriodCard extends HTMLElement {
           height: 100%;
           border: 0;
           border-radius: 0;
-          padding: 0 var(--ha-space-2, 8px) 8px;
+          padding:
+            0 var(--ha-space-6, 24px)
+            0 var(--ha-space-3, 12px);
           color: var(--ha-energy-period-card-select-color);
           background: transparent;
           background-image: none;

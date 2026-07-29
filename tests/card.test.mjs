@@ -212,7 +212,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[\s\S]*?bottom: 4px;[\s\S]*?left: 50%;[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?translateX\(-50%\) rotate\(45deg\)/
+    /\.period-select::after \{[\s\S]*?top: 50%;[\s\S]*?right: 10px;[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?translateY\(-70%\) rotate\(45deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
