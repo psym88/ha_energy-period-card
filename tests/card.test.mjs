@@ -235,6 +235,19 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
   );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /div\.wrapper \{\s*padding: 0;\s*\}/
+  );
+});
+
+test("renders the frameless mode without a card wrapper", () => {
+  const card = new Card();
+  card._hass = createHass();
+  card.setConfig({ collection_key: "energy_1", show_card: false });
+
+  assert.match(card.shadowRoot.innerHTML, /<div class="wrapper">/);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /<ha-card class="wrapper">/);
 });
 
 test("uses only relative labels supplied by Home Assistant", () => {
