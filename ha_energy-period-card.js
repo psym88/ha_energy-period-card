@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.2.0";
+const CARD_VERSION = "3.3.0";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -644,13 +644,25 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .date-navigation {
           display: grid;
-          grid-template-columns: 44px minmax(0, 1fr) 44px;
+          grid-template-columns:
+            44px minmax(76px, .8fr) minmax(92px, 1.2fr) 44px;
           min-height: 44px;
-          margin-top: var(--ha-space-2, 8px);
           overflow: hidden;
           border: 1px solid var(--divider-color);
           border-radius: var(--ha-energy-period-card-select-radius);
           background: var(--ha-energy-period-card-select-background);
+        }
+        .date-navigation select {
+          min-width: 0;
+          height: 44px;
+          border: 0;
+          border-right: 1px solid var(--divider-color);
+          border-radius: 0;
+          padding: 0 var(--ha-space-2, 8px);
+          background: transparent;
+        }
+        .date-navigation select:focus-visible {
+          outline-offset: -2px;
         }
         .date-navigation button[data-shift] {
           display: inline-flex;
@@ -696,19 +708,6 @@ class HaEnergyPeriodCard extends HTMLElement {
             ? `<div class="title">${escapeHtml(this._config.title)}</div>`
             : ""
         }
-        <select
-          data-period
-          aria-label="Energy period"
-          ${this._busy || !this._hass ? "disabled" : ""}
-        >
-          <option value="" hidden>Select period</option>
-          ${PERIODS.map(
-            (period) =>
-              `<option value="${period}" ${
-                period === this._active ? "selected" : ""
-              }>${escapeHtml(labels[period])}</option>`
-          ).join("")}
-        </select>
         <div class="date-navigation">
           <button
             type="button"
@@ -717,6 +716,19 @@ class HaEnergyPeriodCard extends HTMLElement {
             title="${escapeHtml(previousLabel)}"
             ${this._busy || !this._hass || !this._active ? "disabled" : ""}
           >‹</button>
+          <select
+            data-period
+            aria-label="Energy period"
+            ${this._busy || !this._hass ? "disabled" : ""}
+          >
+            <option value="" hidden>Select period</option>
+            ${PERIODS.map(
+              (period) =>
+                `<option value="${period}" ${
+                  period === this._active ? "selected" : ""
+                }>${escapeHtml(labels[period])}</option>`
+            ).join("")}
+          </select>
           <button
             type="button"
             class="date-range"

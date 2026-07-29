@@ -203,7 +203,11 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /grid-template-columns: 44px minmax\(0, 1fr\) 44px/
+    /44px minmax\(76px, \.8fr\) minmax\(92px, 1\.2fr\) 44px/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /<div class="date-navigation">[\s\S]*?data-shift="previous"[\s\S]*?<select[\s\S]*?data-period[\s\S]*?class="date-range"[\s\S]*?data-shift="next"/
   );
   assert.match(
     card.shadowRoot.innerHTML,
