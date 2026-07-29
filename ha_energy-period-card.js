@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.0-beta.3";
+const CARD_VERSION = "1.1.0-beta.4";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -622,9 +622,6 @@ class HaEnergyPeriodCard extends HTMLElement {
           padding: 0 var(--ha-space-2, 8px);
           color: var(--primary-text-color);
           background: transparent;
-          font: inherit;
-          font-size: var(--ha-font-size-m, 14px);
-          line-height: 1.05;
           text-align: center;
           white-space: pre-line;
           cursor: pointer;
@@ -658,15 +655,21 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .period-select::after {
           position: absolute;
-          top: 50%;
-          right: var(--ha-space-2, 8px);
+          bottom: 4px;
+          left: 50%;
           width: 6px;
           height: 6px;
           border-right: 2px solid var(--secondary-text-color);
           border-bottom: 2px solid var(--secondary-text-color);
           content: "";
           pointer-events: none;
-          transform: translateY(-70%) rotate(45deg);
+          transform: translateX(-50%) rotate(45deg);
+        }
+        .date-navigation select,
+        .date-range {
+          font: inherit;
+          font-size: var(--ha-font-size-l, 16px);
+          line-height: 1.05;
         }
         .date-navigation select {
           appearance: none;
@@ -676,13 +679,10 @@ class HaEnergyPeriodCard extends HTMLElement {
           height: 100%;
           border: 0;
           border-radius: 0;
-          padding: 0 var(--ha-space-5, 20px) 0 var(--ha-space-2, 8px);
+          padding: 0 var(--ha-space-2, 8px) 8px;
           color: var(--ha-energy-period-card-select-color);
           background: transparent;
           background-image: none;
-          font: inherit;
-          font-size: var(--ha-font-size-l, 16px);
-          line-height: var(--ha-line-height-normal, 1.4);
           text-align: center;
           text-align-last: center;
           cursor: pointer;

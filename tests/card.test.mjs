@@ -212,7 +212,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?rotate\(45deg\)/
+    /\.period-select::after \{[\s\S]*?bottom: 4px;[\s\S]*?left: 50%;[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?translateX\(-50%\) rotate\(45deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -237,7 +237,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-range \{[\s\S]*?font-size: var\(--ha-font-size-m, 14px\)/
+    /\.date-navigation select,\s*\.date-range \{[\s\S]*?font-size: var\(--ha-font-size-l, 16px\);[\s\S]*?line-height: 1\.05/
   );
   assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
