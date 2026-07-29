@@ -21,15 +21,19 @@ A compact Home Assistant dashboard card for selecting the current Energy period:
 HACS normally registers this resource automatically:
 
 ```text
-/hacsfiles/ha_energy-period-card/ha_energy-period-card.js
+/hacsfiles/ha_energy-period-card/ha_energy-period-card.js?hacstag=…
 ```
 
-If it is missing, add it as a JavaScript module under **Settings → Dashboards → Resources**.
+The HACS-generated `hacstag` value identifies the installed revision and changes after an update to invalidate browser caches. Keep the JavaScript filename stable; HACS manages the version parameter.
+
+If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-period-card.js` as a JavaScript module under **Settings → Dashboards → Resources**.
 
 ## Configuration
 
+> **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
+
 ```yaml
-type: custom:simple-energy-period-card
+type: custom:ha_energy-period-card
 collection_key: energy_1
 title: Period
 show_card: true

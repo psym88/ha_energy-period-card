@@ -5,7 +5,7 @@
  */
 
 // HA Energy Period Card
-class SimpleEnergyPeriodCard extends HTMLElement {
+class HaEnergyPeriodCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -221,11 +221,19 @@ class SimpleEnergyPeriodCard extends HTMLElement {
   }
 }
 
-customElements.define("simple-energy-period-card", SimpleEnergyPeriodCard);
+if (!customElements.get("ha_energy-period-card")) {
+  customElements.define("ha_energy-period-card", HaEnergyPeriodCard);
+}
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "simple-energy-period-card",
+  type: "ha_energy-period-card",
   name: "Simple Energy Period Card",
   description: "Buttons for Today, Week, Month, and Year for an Energy collection_key",
 });
+
+console.info(
+  "%c HA_ENERGY-PERIOD-CARD %c v1.0.4 ",
+  "color: white; background: #03a9f4; font-weight: 600; padding: 2px 6px; border-radius: 3px 0 0 3px;",
+  "color: #03a9f4; background: white; font-weight: 600; padding: 2px 6px; border-radius: 0 3px 3px 0; border: 1px solid #03a9f4;"
+);
