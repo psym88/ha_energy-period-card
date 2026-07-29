@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "3.1.1";
+const CARD_VERSION = "3.1.2";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -28,24 +28,23 @@ const PERIOD_LABELS = Object.freeze({
 });
 const RELATIVE_PERIOD_KEYS = Object.freeze({
   today: Object.freeze({
-    "-1": "ui.components.date-range-picker.ranges.yesterday",
-    0: "ui.components.date-range-picker.ranges.today",
-    1: "ui.components.date-range-picker.ranges.tomorrow",
+    "-1": "ui.components.selectors.period.periods.yesterday",
+    0: "ui.components.selectors.period.periods.today",
+    1: "ui.components.selectors.period.periods.tomorrow",
   }),
   week: Object.freeze({
-    "-1": "ui.components.date-range-picker.ranges.last_week",
-    0: "ui.components.date-range-picker.ranges.this_week",
-    1: "ui.components.date-range-picker.ranges.next_week",
+    "-1": "ui.components.selectors.period.periods.last_week",
+    0: "ui.components.selectors.period.periods.this_week",
+    1: "ui.components.selectors.period.periods.next_week",
   }),
   month: Object.freeze({
-    "-1": "ui.components.date-range-picker.ranges.last_month",
-    0: "ui.components.date-range-picker.ranges.this_month",
-    1: "ui.components.date-range-picker.ranges.next_month",
+    "-1": "ui.components.selectors.period.periods.last_month",
+    0: "ui.components.selectors.period.periods.this_month",
+    1: "ui.components.selectors.period.periods.next_month",
   }),
   year: Object.freeze({
-    "-1": "ui.components.date-range-picker.ranges.last_year",
-    0: "ui.components.date-range-picker.ranges.this_year",
-    1: "ui.components.date-range-picker.ranges.next_year",
+    "-1": "ui.components.selectors.period.periods.last_year",
+    0: "ui.components.selectors.period.periods.this_year",
   }),
 });
 

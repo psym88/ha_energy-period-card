@@ -222,6 +222,12 @@ test("renders an accessible dropdown, date range, and theme extension points", (
 test("uses only relative labels supplied by Home Assistant", () => {
   const card = new Card();
   card._hass = createHass();
+  const requestedKeys = [];
+  const localize = card._hass.localize.bind(card._hass);
+  card._hass.localize = (key) => {
+    requestedKeys.push(key);
+    return localize(key);
+  };
   card._rangeStart = new Date(2026, 6, 29);
   card._rangeEnd = new Date(2026, 6, 29, 23, 59, 59);
   card._active = "today";
@@ -233,6 +239,9 @@ test("uses only relative labels supplied by Home Assistant", () => {
 
   card._active = "week";
   assert.equal(card._formatDateRange(), "Last week");
+  assert.ok(
+    requestedKeys.includes("ui.components.selectors.period.periods.last_week")
+  );
 
   card._offset = -2;
   assert.equal(card._formatDateRange(), "07/29/2026 – 07/29/2026");
