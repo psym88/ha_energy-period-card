@@ -119,26 +119,6 @@ test("provides a built-in configuration form and stub config", () => {
   );
 });
 
-test("uses Home Assistant translations and falls back to English", () => {
-  const card = new Card();
-  card._hass = createHass("custom");
-  assert.equal(card._localizePeriod("today"), "Localized today");
-  assert.equal(card._localizePeriod("week"), "Localized week");
-
-  card._hass = createHass("unsupported");
-  assert.equal(card._localizePeriod("month"), "Month");
-});
-
-test("uses compact German period labels for German locales", () => {
-  const card = new Card();
-  card._hass = createHass("de-CH");
-
-  assert.equal(card._localizePeriod("today"), "Heute");
-  assert.equal(card._localizePeriod("week"), "Woche");
-  assert.equal(card._localizePeriod("month"), "Monat");
-  assert.equal(card._localizePeriod("year"), "Jahr");
-});
-
 test("escapes a configured title before rendering", () => {
   const card = new Card();
   card.setConfig({
@@ -159,27 +139,35 @@ test("initializes when Home Assistant is assigned after configuration", () => {
   assert.equal(initializationCount, 1);
 });
 
-test("renders accessible controls and theme extension points", () => {
+test("renders an accessible dropdown, date range, and theme extension points", () => {
   const card = new Card();
   card._hass = createHass();
+  card._rangeStart = new Date(2026, 6, 1, 0, 0, 0);
+  card._rangeEnd = new Date(2026, 6, 31, 23, 59, 59);
   card.setConfig({ collection_key: "energy_1" });
 
-  assert.match(card.shadowRoot.innerHTML, /role="group"/);
-  assert.match(card.shadowRoot.innerHTML, /aria-pressed="false"/);
-  assert.match(card.shadowRoot.innerHTML, /button:focus-visible/);
+  assert.match(card.shadowRoot.innerHTML, /<select/);
+  assert.match(card.shadowRoot.innerHTML, /aria-label="Energy period"/);
+  assert.match(card.shadowRoot.innerHTML, /<option value="today"/);
+  assert.match(card.shadowRoot.innerHTML, /<option value="week"/);
+  assert.match(card.shadowRoot.innerHTML, /<option value="month"/);
+  assert.match(card.shadowRoot.innerHTML, /<option value="year"/);
+  assert.match(card.shadowRoot.innerHTML, />Today<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, />Year<\/option>/);
+  assert.match(card.shadowRoot.innerHTML, /class="date-range"/);
+  assert.match(card.shadowRoot.innerHTML, /07\/01\/2026 – 07\/31\/2026/);
+  assert.match(card.shadowRoot.innerHTML, /text-align: center/);
+  assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-active-background/
-  );
-  assert.match(
-    card.shadowRoot.innerHTML,
-    /var\(--primary-color, var\(--ha-color-primary-40\)\)/
+    /--ha-energy-period-card-select-background/
   );
   assert.match(
     card.shadowRoot.innerHTML,
     /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
   );
-  assert.match(card.shadowRoot.innerHTML, /@container \(max-width: 360px\)/);
 });
 
 test("detects Home Assistant-provided preset ranges", async () => {
@@ -249,6 +237,8 @@ test("clears the active state for a custom date range", async () => {
 
   await card._syncFromNative();
   assert.equal(card._active, undefined);
+  assert.equal(card._rangeStart.getDate(), 1);
+  assert.equal(card._rangeEnd.getDate(), 12);
 });
 
 test("rejects an incompatible Home Assistant selector", () => {

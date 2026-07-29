@@ -1,6 +1,6 @@
 # HA Energy Period Card
 
-A compact Home Assistant dashboard card for selecting the current Energy period: Today, Week, Month, or Year.
+A compact Home Assistant dashboard card with a dropdown for selecting the current Energy period: Today, Week, Month, or Year.
 
 ![HA Energy Period Card preview](images/preview.svg)
 
@@ -9,10 +9,9 @@ A compact Home Assistant dashboard card for selecting the current Energy period:
 - Uses Home Assistant's native Energy period
 - Synchronizes with other cards using the same Energy data collection
 - Uses Home Assistant's locale, time zone, daylight-saving rules, and first weekday
-- Localizes period labels through Home Assistant with English fallbacks
+- Shows the active date range below the period dropdown
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
-- Adapts from four columns to two or one on narrow cards
 - Detects incompatible Home Assistant Energy selector changes and shows an error
 - Can be displayed without an outer card frame
 
@@ -38,6 +37,8 @@ If the resource is missing, add `/hacsfiles/ha_energy-period-card/ha_energy-peri
 ## Configuration
 
 > **Breaking change in v1.0.4:** Replace `custom:simple-energy-period-card` with `custom:ha_energy-period-card` in existing dashboards.
+>
+> **Breaking change in v2.0.0:** The four localized buttons were replaced with one dropdown using fixed English period labels.
 
 The card supports Home Assistant's visual card editor. YAML configuration remains available:
 
@@ -56,22 +57,15 @@ show_card: true
 
 The `collection_key` must match the associated Energy date selection. A typical value is `energy_1`.
 
-## Localization
-
-German users see the compact labels `Heute`, `Woche`, `Monat`, and `Jahr`. Other languages use Home Assistant's built-in date-range translations, with English fallbacks when no translation is available.
-
 ## Theme variables
 
-The card prioritizes Home Assistant's user-configurable theme colors and uses semantic color variables as fallbacks. It also follows Home Assistant's typography, spacing, animation, and button-radius variables. Themes can override these card-specific variables:
+The card prioritizes Home Assistant's user-configurable theme colors and uses semantic color variables as fallbacks. It also follows Home Assistant's typography, spacing, and radius variables. Themes can override these card-specific variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `--ha-energy-period-card-active-background` | Selected period background |
-| `--ha-energy-period-card-active-color` | Selected period text |
-| `--ha-energy-period-card-button-background` | Inactive button background |
-| `--ha-energy-period-card-button-background-hover` | Inactive hover background |
-| `--ha-energy-period-card-button-color` | Inactive button text |
-| `--ha-energy-period-card-button-radius` | Button corner radius |
+| `--ha-energy-period-card-select-background` | Dropdown background |
+| `--ha-energy-period-card-select-color` | Dropdown text |
+| `--ha-energy-period-card-select-radius` | Dropdown corner radius |
 
 Example:
 
@@ -79,8 +73,8 @@ Example:
 card_mod:
   style: |
     ha-card {
-      --ha-energy-period-card-active-background: var(--accent-color);
-      --ha-energy-period-card-button-radius: 12px;
+      --ha-energy-period-card-select-background: var(--secondary-background-color);
+      --ha-energy-period-card-select-radius: 12px;
     }
 ```
 

@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.1.3";
+const CARD_VERSION = "2.0.0";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
@@ -14,17 +14,11 @@ const PERIOD_PRESET_KEYS = Object.freeze({
   month: "this_month",
   year: "this_year",
 });
-const PERIOD_FALLBACK_LABELS = Object.freeze({
+const PERIOD_LABELS = Object.freeze({
   today: "Today",
   week: "Week",
   month: "Month",
   year: "Year",
-});
-const GERMAN_PERIOD_LABELS = Object.freeze({
-  today: "Heute",
-  week: "Woche",
-  month: "Monat",
-  year: "Jahr",
 });
 
 function assertConfig(config) {
@@ -221,6 +215,8 @@ class HaEnergyPeriodCard extends HTMLElement {
     this._hass = undefined;
     this._adapter = new EnergyPeriodAdapter(this);
     this._active = undefined;
+    this._rangeStart = undefined;
+    this._rangeEnd = undefined;
     this._syncTimer = undefined;
     this._syncInterval = undefined;
     this._justClickedUntil = 0;
@@ -364,11 +360,11 @@ class HaEnergyPeriodCard extends HTMLElement {
       const { start, end } = this._adapter.getCurrentRange();
       if (!start || !end) return;
 
+      this._rangeStart = new Date(start);
+      this._rangeEnd = new Date(end);
       const detected = await this._detectPeriod(start, end);
-      if (detected !== this._active) {
-        this._active = detected;
-        this._updateButtons();
-      }
+      this._active = detected;
+      this._updateControl();
     } catch (error) {
       this._setError(error);
     }
@@ -381,14 +377,16 @@ class HaEnergyPeriodCard extends HTMLElement {
 
     try {
       await this._adapter.ensure(this._hass, this._config.collection_key);
-      await this._adapter.setPeriod(
+      const range = await this._adapter.setPeriod(
         period,
         this._hass,
         this._config.collection_key
       );
       this._clearError();
       this._active = period;
-      this._updateButtons();
+      this._rangeStart = new Date(range.start);
+      this._rangeEnd = new Date(range.end);
+      this._updateControl();
     } catch (error) {
       this._setError(error);
     } finally {
@@ -411,22 +409,25 @@ class HaEnergyPeriodCard extends HTMLElement {
     return undefined;
   }
 
-  _localizePeriod(period) {
-    const language = this._hass?.locale?.language || this._hass?.language || "";
-    if (language.toLowerCase().split(/[-_]/)[0] === "de") {
-      return GERMAN_PERIOD_LABELS[period] || period;
-    }
-    const presetKey = PERIOD_PRESET_KEYS[period];
-    const translated = this._hass?.localize?.(
-      `ui.components.date-range-picker.ranges.${presetKey}`
-    );
-    return translated || PERIOD_FALLBACK_LABELS[period] || period;
+  _formatDateRange() {
+    if (!this._rangeStart || !this._rangeEnd) return "";
+    const locale =
+      this._hass?.locale?.language || this._hass?.language || "en";
+    const formatter = new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: this._hass?.config?.time_zone,
+    });
+    return `${formatter.format(this._rangeStart)} – ${formatter.format(
+      this._rangeEnd
+    )}`;
   }
 
   _setBusy(busy) {
     if (busy === this._busy) return;
     this._busy = busy;
-    this._updateButtons();
+    this._updateControl();
   }
 
   _setError(error) {
@@ -442,37 +443,27 @@ class HaEnergyPeriodCard extends HTMLElement {
     this._render();
   }
 
-  _updateButtons() {
+  _updateControl() {
     if (!this._rendered) return;
-    this.shadowRoot.querySelectorAll("button[data-period]").forEach((button) => {
-      const active = button.dataset.period === this._active;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-      button.disabled = this._busy || !this._hass;
-    });
+    const select = this.shadowRoot.querySelector?.("select[data-period]");
+    if (select) {
+      select.value = this._active || "";
+      select.disabled = this._busy || !this._hass;
+    }
+    const dateRange = this.shadowRoot.querySelector?.(".date-range");
+    if (dateRange) dateRange.textContent = this._formatDateRange();
   }
 
   _render() {
     const tag = this._config.show_card ? "ha-card" : "div";
-    const labels = Object.fromEntries(
-      PERIODS.map((period) => [period, this._localizePeriod(period)])
-    );
-
     this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
-          container-type: inline-size;
-          --ha-energy-period-card-active-background:
-            var(--primary-color, var(--ha-color-primary-40));
-          --ha-energy-period-card-active-color:
-            var(--text-primary-color, var(--ha-color-on-primary-loud, #fff));
-          --ha-energy-period-card-button-background:
+          --ha-energy-period-card-select-background:
             var(--secondary-background-color, var(--ha-color-surface-low));
-          --ha-energy-period-card-button-background-hover:
-            var(--divider-color, var(--ha-color-surface-lower, var(--ha-color-primary-95)));
-          --ha-energy-period-card-button-color: var(--primary-text-color);
-          --ha-energy-period-card-button-radius:
+          --ha-energy-period-card-select-color: var(--primary-text-color);
+          --ha-energy-period-card-select-radius:
             var(--ha-button-border-radius, 999px);
         }
         ha-card,
@@ -487,69 +478,40 @@ class HaEnergyPeriodCard extends HTMLElement {
           font-weight: var(--ha-font-weight-medium, 500);
           line-height: var(--ha-line-height-condensed, 1.3);
         }
-        .buttons {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: var(--ha-space-2, 8px);
-        }
-        button {
-          appearance: none;
-          min-width: 0;
-          border: 0;
-          border-radius: var(--ha-energy-period-card-button-radius);
-          padding: var(--ha-space-2, 8px) var(--ha-space-3, 12px);
-          overflow: hidden;
-          color: var(--ha-energy-period-card-button-color);
-          background: var(--ha-energy-period-card-button-background);
+        select {
+          appearance: auto;
+          width: 100%;
+          border: 1px solid var(--divider-color);
+          border-radius: var(--ha-energy-period-card-select-radius);
+          padding: var(--ha-space-2, 8px) var(--ha-space-4, 16px);
+          color: var(--ha-energy-period-card-select-color);
+          background: var(--ha-energy-period-card-select-background);
           font: inherit;
           font-size: var(--ha-font-size-m, 14px);
           line-height: var(--ha-line-height-normal, 1.4);
-          text-overflow: ellipsis;
-          white-space: nowrap;
           cursor: pointer;
-          transition:
-            background var(--ha-animation-duration-fast, 150ms) ease,
-            color var(--ha-animation-duration-fast, 150ms) ease,
-            transform var(--ha-animation-duration-fast, 150ms) ease;
         }
-        button:hover:not(:disabled) {
-          background: var(--ha-energy-period-card-button-background-hover);
-        }
-        button:active:not(:disabled) {
-          transform: scale(.97);
-        }
-        button:focus-visible {
+        select:focus-visible {
           outline: 2px solid var(--primary-color, var(--ha-color-primary-50));
           outline-offset: 2px;
         }
-        button.active {
-          color: var(--ha-energy-period-card-active-color);
-          background: var(--ha-energy-period-card-active-background);
-        }
-        button:disabled {
+        select:disabled {
           cursor: wait;
           opacity: var(--disabled-opacity, .55);
+        }
+        .date-range {
+          min-height: 1.4em;
+          margin-top: var(--ha-space-2, 8px);
+          color: var(--secondary-text-color);
+          font-size: var(--ha-font-size-s, 12px);
+          line-height: var(--ha-line-height-normal, 1.4);
+          text-align: center;
         }
         .error {
           margin-top: var(--ha-space-2, 8px);
           color: var(--error-color);
           font-size: var(--ha-font-size-s, 12px);
           line-height: var(--ha-line-height-normal, 1.4);
-        }
-        @container (max-width: 360px) {
-          .buttons {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-        @container (max-width: 190px) {
-          .buttons {
-            grid-template-columns: 1fr;
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          button {
-            transition: none;
-          }
         }
       </style>
       <${tag} class="wrapper">
@@ -558,24 +520,22 @@ class HaEnergyPeriodCard extends HTMLElement {
             ? `<div class="title">${escapeHtml(this._config.title)}</div>`
             : ""
         }
-        <div
-          class="buttons"
-          role="group"
-          aria-label="${escapeHtml(
-            PERIODS.map((period) => labels[period]).join(", ")
-          )}"
+        <select
+          data-period
+          aria-label="Energy period"
+          ${this._busy || !this._hass ? "disabled" : ""}
         >
+          <option value="" hidden>Select period</option>
           ${PERIODS.map(
-            (period) => `
-              <button
-                type="button"
-                data-period="${period}"
-                aria-pressed="${String(period === this._active)}"
-                title="${escapeHtml(labels[period])}"
-                ${this._busy || !this._hass ? "disabled" : ""}
-              >${escapeHtml(labels[period])}</button>`
+            (period) =>
+              `<option value="${period}" ${
+                period === this._active ? "selected" : ""
+              }>${PERIOD_LABELS[period]}</option>`
           ).join("")}
-        </div>
+        </select>
+        <div class="date-range" aria-live="polite">${escapeHtml(
+          this._formatDateRange()
+        )}</div>
         ${
           this._error
             ? `<div class="error" role="alert">${escapeHtml(this._error)}</div>`
@@ -587,14 +547,14 @@ class HaEnergyPeriodCard extends HTMLElement {
       this.shadowRoot.appendChild(this._adapter.selector);
     }
 
-    this.shadowRoot.querySelectorAll("button[data-period]").forEach((button) => {
-      button.addEventListener("click", () =>
-        this._setPeriod(button.dataset.period)
+    this.shadowRoot
+      .querySelector?.("select[data-period]")
+      ?.addEventListener("change", (event) =>
+        this._setPeriod(event.target.value)
       );
-    });
 
     this._rendered = true;
-    this._updateButtons();
+    this._updateControl();
   }
 }
 
@@ -608,7 +568,7 @@ if (!window.customCards.some((card) => card.type === "ha_energy-period-card")) {
     type: "ha_energy-period-card",
     name: "HA Energy Period Card",
     description:
-      "Localized buttons for selecting the current Home Assistant Energy period.",
+      "Dropdown for selecting the current Home Assistant Energy period.",
   });
 }
 
