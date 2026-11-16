@@ -1,6 +1,6 @@
 {
   "name": "ha_energy-period-card",
-  "version": "1.2.0-rc.6",
+  "version": "1.2.0-rc.7",
   "private": true,
   "description": "Energy period selector card for Home Assistant",
   "scripts": {

@@ -1,6 +1,6 @@
 // HA Energy Period Card
 
-const CARD_VERSION = "1.2.0-rc.6";
+const CARD_VERSION = "1.2.0-rc.7";
 const NATIVE_SELECTOR_TAG = "hui-energy-period-selector";
 const NATIVE_SELECTOR_TIMEOUT_MS = 10000;
 const SYNC_DELAY_MS = 80;
