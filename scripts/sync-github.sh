@@ -4,11 +4,10 @@
 # Forgejo is the source of truth. GitHub gets the branch and the tags that exist
 # here, plus the release as a GitHub release object with the file HACS installs
 # as its asset, because that asset is what a download count on GitHub counts.
-# What GitHub shows of a ref is the installable set: the development folders,
-# tests and helper scripts here are never published, see published_commit.
-# Nothing is ever deleted on GitHub, a published tag never moves, and an asset a
-# release already carries stays where it is: uploading it again starts its count
-# at zero.
+# What GitHub shows of a ref is the installable set, built from an include list,
+# see publish_include. Nothing is ever deleted on GitHub, a published tag never
+# moves, and an asset a release already carries stays where it is: uploading it
+# again starts its count at zero.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -30,38 +29,98 @@ github_uploads="https://uploads.github.com/repos/${GITHUB_DISTRIBUTION_REPOSITOR
 auth_header="Authorization: Basic $(printf 'x-access-token:%s' "$GH_RELEASE_TOKEN" | base64 -w0)"
 github() { git -c "http.extraHeader=${auth_header}" "$@"; }
 
-# What a published repository is: the files Home Assistant Marketplace installs
-# and the page a visitor reads. The folder this repository is developed in, its
-# tests, its helper scripts, its ignore file and the files its package manager
-# works from stay on Forgejo, so GitHub never shows or runs anything that belongs
-# to working here rather than to installing. .github is on the list too: this
-# repository publishes from Forgejo, and a workflow that arrived on GitHub would
-# be built there.
-publish_ignore=()
-read -r -a publish_ignore <<< "${PUBLISH_IGNORE:-.forgejo .gitea .github test tests scripts .gitignore package.json package-lock.json}"
+# What a published repository is: an include list rather than a list of things to
+# leave out, so a file added to this repository is not on GitHub until somebody
+# names it here. Home Assistant Marketplace reads hacs.json at the ref it installs,
+# so that file is always part of the set, and so is the file it names: the asset of
+# the release is what gets installed, but when a release has no asset HACS falls
+# back to the files at the ref. Everything the README shows has to be named too, a
+# picture that is not published is a broken picture on that page.
+publish_include=()
+read -r -a publish_include <<< "${PUBLISH_INCLUDE:-hacs.json README.md LICENSE images}"
 
-# The tree a ref gets on GitHub: the tree of the source commit without the files
-# nobody installs. The index this is built in is a scratch file, so its entries
-# are removed with -f, and the list is checked against the result: a path that
-# survived the filter is an error rather than a published repository that was
-# meant to be without it.
+# Where the file hacs.json names sits inside a commit: beside hacs.json, under
+# themes/ for a theme, under dist/ for built code.
+manifest_file() {
+  local source=$1 name candidate
+  name=$(git show "${source}:hacs.json" 2>/dev/null | json filename 2>/dev/null)
+  if test -z "$name" && git show "${source}:hacs.json" 2>/dev/null | grep -q '"filename"'; then
+    echo "${source} has a hacs.json with a filename that does not read as JSON." >&2
+    return 1
+  fi
+  test -n "$name" || return 0
+  for candidate in "${name}" "themes/${name}" "dist/${name}"; do
+    if git cat-file -e "${source}:${candidate}" 2>/dev/null; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  echo "${source} names ${name} in hacs.json, but carries it beside itself, under themes/ or under dist/." >&2
+  return 1
+}
+
+# A path is published when the list names it or names the folder it sits in.
+is_published() {
+  local path=$1 entry
+  shift
+  for entry in "$@"; do
+    case "$path" in
+      "$entry" | "$entry"/*) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# The tree a ref gets on GitHub: the files of the source commit that the list
+# names, plus the file hacs.json names. Entries go from the object store into a
+# scratch index, so the checkout of this run is not involved, and the result is
+# read back against the list: a file that slipped in is an error rather than a
+# published repository that is wider than it was meant to be.
 published_tree() {
-  local source=$1 index tree path
+  local source=$1 index tree entry mode sha path wanted
+  local keep=("${publish_include[@]}")
+  wanted=$(manifest_file "$source") || return 1
+  if test -n "$wanted"; then
+    keep+=("$wanted")
+  fi
   index=$(mktemp)
-  if ! GIT_INDEX_FILE="$index" git read-tree "${source}^{tree}" ||
-    ! GIT_INDEX_FILE="$index" git rm -r -q -f --cached --ignore-unmatch -- "${publish_ignore[@]}" ||
-    ! tree=$(GIT_INDEX_FILE="$index" git write-tree); then
+  if ! GIT_INDEX_FILE="$index" git read-tree --empty; then
     rm -f "$index"
     echo "Could not build the published tree of ${source}" >&2
     return 1
   fi
+  while IFS= read -r -d '' entry; do
+    mode=${entry%%$'\t'*}
+    sha=${entry#*$'\t'}
+    sha=${sha%%$'\t'*}
+    path=${entry#*$'\t'}
+    path=${path#*$'\t'}
+    if is_published "$path" "${keep[@]}"; then
+      if ! GIT_INDEX_FILE="$index" git update-index --add --cacheinfo "${mode},${sha},${path}"; then
+        rm -f "$index"
+        echo "Could not add ${path} to the published tree of ${source}" >&2
+        return 1
+      fi
+    fi
+  done < <(git ls-tree -r --format='%(objectmode)%x09%(objectname)%x09%(path)%x00' "${source}^{tree}")
+  tree=$(GIT_INDEX_FILE="$index" git write-tree)
   rm -f "$index"
-  for path in "${publish_ignore[@]}"; do
-    if git cat-file -e "${tree}:${path}" 2>/dev/null; then
-      echo "${path} is still in the published tree, the filter did not remove it." >&2
+  if test -z "$tree" || test "$(git ls-tree -r --name-only "$tree" | wc -l)" = 0; then
+    echo "Publishing ${source} would leave no files at all, the include list is wrong." >&2
+    return 1
+  fi
+  if ! git cat-file -e "${tree}:hacs.json" 2>/dev/null; then
+    echo "The include list does not carry hacs.json, so the Marketplace would have nothing to read." >&2
+    return 1
+  fi
+  while IFS= read -r -d '' entry; do
+    path=${entry#*$'\t'}
+    path=${path#*$'\t'}
+    if ! is_published "$path" "${keep[@]}"; then
+      echo "${path} is not on the include list but ended up in the published tree." >&2
       return 1
     fi
-  done
+  done < <(git ls-tree -r --format='%(objectmode)%x09%(objectname)%x09%(path)%x00' "$tree")
   printf '%s\n' "$tree"
 }
 
@@ -78,27 +137,6 @@ published_commit() {
   if test "$tree" = "$(git rev-parse "${source}^{tree}")"; then
     printf '%s\n' "$source"
     return
-  fi
-  if test "$(git ls-tree --name-only "$tree" | wc -l)" = 0; then
-    echo "Publishing ${source} would leave no files at all, the ignore list is wrong." >&2
-    return 1
-  fi
-  # The file the Marketplace installs has to survive the filter, whatever else
-  # is left out.
-  if ! git cat-file -e "${tree}:hacs.json" 2>/dev/null; then
-    echo "The published copy of ${source} has no hacs.json, the Marketplace cannot read it." >&2
-    return 1
-  fi
-  name=$(git show "${tree}:hacs.json" | json filename)
-  if test -n "$name"; then
-    if git cat-file -e "${tree}:${name}" 2>/dev/null ||
-      git cat-file -e "${tree}:themes/${name}" 2>/dev/null ||
-      git cat-file -e "${tree}:dist/${name}" 2>/dev/null; then
-      :
-    else
-      echo "The published copy of ${source} lost ${name}, which hacs.json names." >&2
-      return 1
-    fi
   fi
   name=$(git show -s --format='%an' "$source")
   email=$(git show -s --format='%ae' "$source")
@@ -139,7 +177,7 @@ printf 'Pushed %s to %s' "$source_ref" "$branch"
 if test "$published" = "$(git rev-parse "$source_ref")"; then
   printf '.\n'
 else
-  printf ', without %s.\n' "$(printf '%s ' "${publish_ignore[@]}")"
+  printf ', with only %s.\n' "$(printf '%s ' "${publish_include[@]}")"
 fi
 echo '::endgroup::'
 
@@ -260,26 +298,14 @@ fi
 echo '::endgroup::'
 
 echo '::group::Release asset'
-# HACS installs the file hacs.json names, so that file is the asset of the
-# release: a card keeps it next to hacs.json, a theme under themes/ and a built
-# card under dist/. An asset the release already carries is left alone, because
-# the download count hangs off the asset itself and a re-uploaded one counts from
-# zero again.
-asset_name=$(printf '%s' "$(git show "refs/tags/${release_tag}:hacs.json" 2>/dev/null || true)" | json filename)
-if test -z "$asset_name"; then
+# The file hacs.json names is the asset of the release, because that is what HACS
+# installs and what a download count on GitHub counts. An asset the release already
+# carries is left alone: uploading it again starts that count from zero.
+asset_path=$(manifest_file "refs/tags/${release_tag}") || exit 1
+if test -z "$asset_path"; then
   echo "hacs.json at ${release_tag} names no filename, so there is no asset to upload."
 else
-  asset_path=""
-  for candidate in "${asset_name}" "themes/${asset_name}" "dist/${asset_name}"; do
-    if git cat-file -e "refs/tags/${release_tag}:${candidate}" 2>/dev/null; then
-      asset_path="${candidate}"
-      break
-    fi
-  done
-  if test -z "$asset_path"; then
-    echo "hacs.json names ${asset_name}, but ${release_tag} carries it beside itself, under themes/ or under dist/." >&2
-    exit 1
-  fi
+  asset_name=$(basename "$asset_path")
   release_id=$(printf '%s' "$created" | json id)
   existing_asset=$(printf '%s' "$created" | node -e '
     let input = "";

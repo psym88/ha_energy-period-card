@@ -34,6 +34,9 @@ jobs:
       FORGEJO_API_URL: ${{ github.api_url }}
       FORGEJO_REPOSITORY: ${{ github.repository }}
       GITHUB_DISTRIBUTION_REPOSITORY: psym88/ha_energy-period-card
+      # What the published copy holds. The file hacs.json names comes along with
+      # it, so the card itself is not listed here.
+      PUBLISH_INCLUDE: hacs.json README.md LICENSE images
       BRANCH: main
       RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
     steps:
