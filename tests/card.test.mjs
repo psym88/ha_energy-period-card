@@ -212,19 +212,27 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*border: var\(--ha-border-width-sm, 1px\) solid\s+var\(--ha-energy-period-card-field-border-color\);/
+    /\.period-select select \{[^}]*border: 0;[^}]*border-radius: var\(--ha-energy-period-card-field-radius\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*color: var\(--ha-energy-period-card-select-color\);[^}]*font-size: var\(--ha-font-size-m, 14px\);/
+    /\.period-select select \{[^}]*background-color: var\(--ha-energy-period-card-field-background\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select:focus-visible \{[^}]*border-color: var\(--ha-energy-period-card-field-focus-border-color\);[^}]*outline: none;/
+    /\.period-select select \{[^}]*color: inherit;[^}]*font-size: var\(--ha-font-size-m, 14px\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*translateY\(-65%\) rotate\(45deg\)/
+    /\.period-select select:hover:not\(:disabled\) \{[^}]*background-color: var\(--ha-energy-period-card-field-hover-background\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-select select:focus-visible \{[^}]*outline: none;[^}]*box-shadow: 0 0 0 2px var\(--ha-energy-period-card-field-focus-color\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-select::after \{[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*translateY\(-70%\) rotate\(45deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -262,7 +270,23 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-nav-radius:[\s\S]*?var\(--ha-button-border-radius, var\(--ha-border-radius-pill, 999px\)\)/
+    /--ha-energy-period-card-field-background:[\s\S]*?color-mix\(\s*in srgb,\s*var\(--disabled-color, var\(--secondary-text-color\)\) 20%,/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-field-hover-background:[\s\S]*?--ha-color-on-neutral-quiet/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-field-focus-color:[\s\S]*?var\(--feature-color, var\(--primary-color, var\(--ha-color-focus\)\)\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-field-radius:[\s\S]*?var\(--feature-border-radius, var\(--ha-border-radius-lg, 12px\)\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-nav-radius:[\s\S]*?var\(--feature-border-radius, var\(--ha-border-radius-lg, 12px\)\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -303,7 +327,7 @@ test("gives every control in the row the same height", () => {
   }
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-control-height: var\(--ha-button-height, 40px\);/
+    /--ha-energy-period-card-control-height:\s*var\(--feature-height, var\(--ha-button-height, 40px\)\);/
   );
 });
 

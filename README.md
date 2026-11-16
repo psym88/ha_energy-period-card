@@ -67,9 +67,8 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-control-height` | Height of the dropdown, the date and the arrow buttons |
 | `--ha-energy-period-card-select-color` | Text of the period dropdown |
 | `--ha-energy-period-card-field-background` | Background of the period dropdown |
-| `--ha-energy-period-card-field-border-color` | Border of the period dropdown |
-| `--ha-energy-period-card-field-hover-border-color` | Border of the period dropdown on hover |
-| `--ha-energy-period-card-field-focus-border-color` | Border of the period dropdown with keyboard focus |
+| `--ha-energy-period-card-field-hover-background` | Background of the period dropdown on hover |
+| `--ha-energy-period-card-field-focus-color` | Ring around the period dropdown with keyboard focus |
 | `--ha-energy-period-card-field-radius` | Corner radius of the period dropdown |
 | `--ha-energy-period-card-nav-background` | Arrow button background |
 | `--ha-energy-period-card-nav-color` | Arrow glyph |
@@ -78,7 +77,7 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date |
 | `--ha-energy-period-card-transition` | How the hover colours change |
 
-The defaults follow Home Assistant's own controls: the height comes from `--ha-button-height`, the arrow radius from `--ha-button-border-radius`, the dropdown keeps the outlined field look with `--card-background-color` and a border, and hover uses Home Assistant's neutral fill tokens.
+The defaults follow Home Assistant's own controls: the height comes from `--feature-height` and then `--ha-button-height`, the period dropdown is the tinted, borderless control Home Assistant uses in tile features, and the arrows take Home Assistant's neutral fill tokens for resting and hover.
 
 Example:
 
