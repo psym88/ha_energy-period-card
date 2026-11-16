@@ -199,9 +199,12 @@ else
   if test -n "$existing_asset"; then
     echo "Release ${release_tag} already carries ${asset_name} on GitHub, its download count stays as it is."
   else
+    # GitHub names the media types it takes after its own list and answers a type
+    # that is not on it with a 400 and no message at all, so anything that is not
+    # one of these is sent as a plain stream of bytes.
     case "$asset_name" in
       *.js) asset_type="application/javascript" ;;
-      *.yaml | *.yml) asset_type="application/yaml" ;;
+      *.zip) asset_type="application/zip" ;;
       *) asset_type="application/octet-stream" ;;
     esac
     asset_file=$(mktemp)
