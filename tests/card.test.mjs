@@ -200,49 +200,45 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.match(card.shadowRoot.innerHTML, /data-shift="next"/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /30px max-content minmax\(0, 1fr\) 30px/
+    /\.date-navigation \{[^}]*display: flex;[^}]*align-items: center;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select \{[\s\S]*?width: max-content/
+    /\.period-select \{[^}]*color: var\(--ha-energy-period-card-select-color\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-navigation select \{[\s\S]*?appearance: none;[\s\S]*?-webkit-appearance: none;[\s\S]*?background-image: none;/
+    /\.period-select \{[^}]*text-transform: uppercase;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[\s\S]*?top: 50%;[\s\S]*?right: 10px;[\s\S]*?border-right: 2px solid var\(--secondary-text-color\);[\s\S]*?translateY\(-70%\) rotate\(45deg\)/
+    /\.period-select select \{[^}]*appearance: none;[^}]*background-image: none;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-navigation button\[data-shift\] \{[\s\S]*?background: var\(--secondary-background-color\)/
+    /\.period-select::after \{[^}]*border-right: 2px solid currentColor;[^}]*translateY\(-65%\) rotate\(45deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /<div class="date-navigation">[\s\S]*?data-shift="previous"[\s\S]*?<select[\s\S]*?data-period[\s\S]*?class="date-range"[\s\S]*?data-shift="next"/
+    /\.date-nav button\[data-shift\] \{[^}]*width: var\(--ha-energy-period-card-nav-size, 30px\);[^}]*background: var\(--ha-energy-period-card-nav-background\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /button\[data-shift="previous"\][\s\S]*?border-right: 1px solid/
-  );
-  assert.match(
-    card.shadowRoot.innerHTML,
-    /button\[data-shift="next"\][\s\S]*?border-left: 1px solid/
+    /<div class="date-navigation">[\s\S]*?<div[\s\S]*?class="period-select"[\s\S]*?<select[\s\S]*?data-period[\s\S]*?class="date-range"[\s\S]*?<div class="date-nav">[\s\S]*?data-shift="previous"[\s\S]*?data-shift="next"/
   );
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /font-size: var\(--ha-font-size-l, 16px\)/
+    /\.date-range \{[^}]*flex: 1;[^}]*background: transparent;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-navigation select,\s*\.date-range \{[\s\S]*?font-size: var\(--ha-font-size-l, 16px\);[\s\S]*?line-height: 1\.05/
+    /\.date-range \{[^}]*font-size: var\(--ha-font-size-l, 16px\);[^}]*line-height: 1\.05/
   );
   assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-select-background/
+    /--ha-energy-period-card-nav-background:/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -250,15 +246,36 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-nav-radius:[\s\S]*?var\(--ha-button-border-radius, 9px\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
     /div\.wrapper \{\s*padding: 0;\s*\}/
   );
+
+  const rowStyles = card.shadowRoot.innerHTML.match(
+    /\.date-navigation \{[^}]*\}/
+  )?.[0];
+  assert.ok(rowStyles, "the selector row has its own style rule");
+  assert.doesNotMatch(rowStyles, /border|background|border-radius/);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /border-right: 1px solid/);
+});
+
+test("keeps the period dropdown flat while the card is busy", () => {
+  const card = new Card();
+  card.setConfig({ collection_key: "energy_1" });
+
   assert.match(
     card.shadowRoot.innerHTML,
-    /div\.wrapper \.date-navigation \{[\s\S]*?min-height: calc\(30px \+ 2 \* var\(--ha-space-3, 12px\)\);[\s\S]*?border-radius: var\(--ha-card-border-radius, 12px\);[\s\S]*?background: var\(--card-background-color\)/
+    /class="period-select"[\s\S]*?data-disabled="true"/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /div\.wrapper \.date-navigation button\[data-shift\] \{\s*width: calc\(30px \+ 2 \* var\(--ha-space-3, 12px\)\)/
+    /\.period-select\[data-disabled="true"\] \{[^}]*opacity: var\(--disabled-opacity/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-select:hover:not\(\[data-disabled="true"\]\)/
   );
 });
 

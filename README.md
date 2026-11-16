@@ -14,6 +14,7 @@ A compact Home Assistant dashboard card with a dropdown for selecting the Energy
 - Uses Home Assistant's existing relative labels for the current, previous, or next period when available
 - Falls back to an exact date or date range when Home Assistant has no matching relative label
 - Navigates backward or forward by one selected period with date arrows
+- Renders as a flat row: period caption on the left, date in the middle, arrow buttons on the right
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
 - Detects incompatible Home Assistant Energy selector changes and shows an error
@@ -63,9 +64,13 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 
 | Variable | Purpose |
 | --- | --- |
-| `--ha-energy-period-card-select-background` | Segmented control background |
-| `--ha-energy-period-card-select-color` | Dropdown text |
-| `--ha-energy-period-card-select-radius` | Segmented control corner radius |
+| `--ha-energy-period-card-select-color` | Period caption and its caret |
+| `--ha-energy-period-card-select-letter-spacing` | Letter spacing of the period caption |
+| `--ha-energy-period-card-nav-background` | Date arrow button background |
+| `--ha-energy-period-card-nav-color` | Date arrow glyph |
+| `--ha-energy-period-card-nav-hover-background` | Date arrow hover background |
+| `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date label |
+| `--ha-energy-period-card-nav-size` | Width and height of the arrow buttons |
 
 Example:
 
@@ -73,8 +78,8 @@ Example:
 card_mod:
   style: |
     ha-card {
-      --ha-energy-period-card-select-background: var(--secondary-background-color);
-      --ha-energy-period-card-select-radius: 12px;
+      --ha-energy-period-card-nav-background: transparent;
+      --ha-energy-period-card-nav-size: 26px;
     }
 ```
 
