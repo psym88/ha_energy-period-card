@@ -21,7 +21,7 @@ branch=${BRANCH:-main}
 release_tag=${RELEASE_TAG:-}
 github_url="https://github.com/${GITHUB_DISTRIBUTION_REPOSITORY}.git"
 github_api="https://api.github.com/repos/${GITHUB_DISTRIBUTION_REPOSITORY}"
-github_uploads="https://uploads.github.com/repos/${GITHUB_DISTRIBUTION_REPOSITORY}/releases"
+github_uploads="https://uploads.github.com/repos/${GITHUB_DISTRIBUTION_REPOSITORY}"
 
 # The token goes into a header and never into the remote url: git repeats the
 # url in its error messages and would repeat the password with it.
@@ -209,18 +209,16 @@ else
     asset_file=$(mktemp)
     git show "refs/tags/${release_tag}:${asset_path}" >"$asset_file"
     answer=$(mktemp)
-    # curl asks for a 100-continue as soon as a body is larger than a kilobyte,
-    # and the upload host answers that question with an empty 400 instead of an
-    # answer, so the ask is dropped and the file goes in one piece.
+    upload_url="${github_uploads}/releases/${release_id}/assets?name=${asset_name}"
     status=$(curl -sS -o "$answer" -w '%{http_code}' -X POST \
       -H "Authorization: Bearer ${GH_RELEASE_TOKEN}" -H "Accept: application/vnd.github+json" \
-      -H "Content-Type: ${asset_type}" -H "Expect:" \
+      -H "Content-Type: ${asset_type}" \
       --data-binary "@${asset_file}" \
-      "${github_uploads}/releases/${release_id}/assets?name=${asset_name}")
+      "${upload_url}")
     case "$status" in
       200 | 201) uploaded=$(cat "$answer") ;;
       *)
-        echo "GitHub answered ${status} on the asset ${asset_name} of type ${asset_type}:" >&2
+        echo "GitHub answered ${status} on ${upload_url} with type ${asset_type}:" >&2
         cat "$answer" >&2
         rm -f "$asset_file" "$answer"
         exit 1
