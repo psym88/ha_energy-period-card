@@ -6,6 +6,12 @@
 - Keep the card dependency-free and edit `ha_energy-period-card.js` directly; do not add a build step unless the project requirements materially change.
 - Run `npm run check` before committing.
 
+## Style
+
+- The control is a flat row: period caption on the left, date in the middle, arrow buttons on the right. No outer pill, no segment borders, no divider under the row.
+- Take every colour, spacing, radius and font size from Home Assistant theme variables (`--secondary-background-color`, `--divider-color`, `--secondary-text-color`, `--ha-space-*`, `--ha-font-size-*`, `--ha-button-border-radius`), with a literal fallback only where Home Assistant has no variable. Hard-coded colours make the card unthemeable.
+- Expose what a themer would want to change as `--ha-energy-period-card-*` variables on `:host` and keep the README table in step with them.
+
 ## Where this card lives
 
 - The repository is developed on `https://git.itup.ch/mme/ha_energy-period-card`. `https://github.com/psym88/ha_energy-period-card` is the published copy HACS reads.
