@@ -4,6 +4,8 @@
 # Forgejo is the source of truth. GitHub gets the branch and the tags that exist
 # here, plus the release as a GitHub release object with the file HACS installs
 # as its asset, because that asset is what a download count on GitHub counts.
+# What GitHub shows of a ref is the installable set: the development folders,
+# tests and helper scripts here are never published, see published_commit.
 # Nothing is ever deleted on GitHub, a published tag never moves, and an asset a
 # release already carries stays where it is: uploading it again starts its count
 # at zero.
@@ -28,6 +30,86 @@ github_uploads="https://uploads.github.com/repos/${GITHUB_DISTRIBUTION_REPOSITOR
 auth_header="Authorization: Basic $(printf 'x-access-token:%s' "$GH_RELEASE_TOKEN" | base64 -w0)"
 github() { git -c "http.extraHeader=${auth_header}" "$@"; }
 
+# What a published repository is: the files Home Assistant Marketplace installs
+# and the page a visitor reads. The folder this repository is developed in, its
+# tests, its helper scripts, its ignore file and the files its package manager
+# works from stay on Forgejo, so GitHub never shows or runs anything that belongs
+# to working here rather than to installing. .github is on the list too: this
+# repository publishes from Forgejo, and a workflow that arrived on GitHub would
+# be built there.
+publish_ignore=()
+read -r -a publish_ignore <<< "${PUBLISH_IGNORE:-.forgejo .gitea .github test tests scripts .gitignore package.json package-lock.json}"
+
+# The tree a ref gets on GitHub: the tree of the source commit without the files
+# nobody installs. The index this is built in is a scratch file, so its entries
+# are removed with -f, and the list is checked against the result: a path that
+# survived the filter is an error rather than a published repository that was
+# meant to be without it.
+published_tree() {
+  local source=$1 index tree path
+  index=$(mktemp)
+  if ! GIT_INDEX_FILE="$index" git read-tree "${source}^{tree}" ||
+    ! GIT_INDEX_FILE="$index" git rm -r -q -f --cached --ignore-unmatch -- "${publish_ignore[@]}" ||
+    ! tree=$(GIT_INDEX_FILE="$index" git write-tree); then
+    rm -f "$index"
+    echo "Could not build the published tree of ${source}" >&2
+    return 1
+  fi
+  rm -f "$index"
+  for path in "${publish_ignore[@]}"; do
+    if git cat-file -e "${tree}:${path}" 2>/dev/null; then
+      echo "${path} is still in the published tree, the filter did not remove it." >&2
+      return 1
+    fi
+  done
+  printf '%s\n' "$tree"
+}
+
+# The commit a ref gets on GitHub, which is the source commit with that tree and
+# the source commit as its parent: the history on GitHub stays the real history,
+# only what a checkout holds is the installable set. Author and date are the
+# source commit's and the committer is fixed, so the same source commit always
+# becomes the same published commit and a sync that has nothing new to say
+# pushes nothing. A commit whose tree already is the published tree is published
+# as it is.
+published_commit() {
+  local source=$1 tree name email date
+  tree=$(published_tree "$source") || return 1
+  if test "$tree" = "$(git rev-parse "${source}^{tree}")"; then
+    printf '%s\n' "$source"
+    return
+  fi
+  if test "$(git ls-tree --name-only "$tree" | wc -l)" = 0; then
+    echo "Publishing ${source} would leave no files at all, the ignore list is wrong." >&2
+    return 1
+  fi
+  # The file the Marketplace installs has to survive the filter, whatever else
+  # is left out.
+  if ! git cat-file -e "${tree}:hacs.json" 2>/dev/null; then
+    echo "The published copy of ${source} has no hacs.json, the Marketplace cannot read it." >&2
+    return 1
+  fi
+  name=$(git show "${tree}:hacs.json" | json filename)
+  if test -n "$name"; then
+    if git cat-file -e "${tree}:${name}" 2>/dev/null; then
+      :
+    elif git cat-file -e "${tree}:themes/${name}" 2>/dev/null; then
+      :
+    else
+      echo "The published copy of ${source} lost ${name}, which hacs.json names." >&2
+      return 1
+    fi
+  fi
+  name=$(git show -s --format='%an' "$source")
+  email=$(git show -s --format='%ae' "$source")
+  date=$(git show -s --format='%aI' "$source")
+  GIT_AUTHOR_NAME="$name" GIT_AUTHOR_EMAIL="$email" GIT_AUTHOR_DATE="$date" \
+    GIT_COMMITTER_NAME="publish to github" GIT_COMMITTER_EMAIL="sync@forgejo.local" \
+    GIT_COMMITTER_DATE="$date" \
+    git commit-tree "$tree" -p "$source" \
+    -m "Publish the files the Home Assistant Marketplace installs"
+}
+
 json() {
   node -e '
     let input = "";
@@ -51,8 +133,14 @@ test -n "$(git rev-parse --verify --quiet "$source_ref")" || {
   echo "No ${branch} in this checkout to push" >&2
   exit 1
 }
-github push --quiet --force "$github_url" "${source_ref}:refs/heads/${branch}"
-echo "Pushed ${source_ref} to ${branch}."
+published=$(published_commit "$(git rev-parse "$source_ref")") || exit 1
+github push --quiet --force "$github_url" "${published}:refs/heads/${branch}"
+printf 'Pushed %s to %s' "$source_ref" "$branch"
+if test "$published" = "$(git rev-parse "$source_ref")"; then
+  printf '.\n'
+else
+  printf ', without %s.\n' "$(printf '%s ' "${publish_ignore[@]}")"
+fi
 echo '::endgroup::'
 
 echo '::group::Tags'
@@ -78,8 +166,13 @@ else
     local_sha=$(git rev-parse "refs/tags/${tag}^{commit}")
     remote_sha=$(printf '%s\n' "$remote_tags" | awk -v name="refs/tags/${tag}" '$1 == name { print $2 }')
     if test -z "$remote_sha"; then
-      refspecs+=("refs/tags/${tag}:refs/tags/${tag}")
+      published=$(published_commit "$local_sha") || exit 1
+      refspecs+=("${published}:refs/tags/${tag}")
     elif test "$remote_sha" = "$local_sha"; then
+      present=$((present + 1))
+    elif published=$(published_commit "$local_sha") && test "$remote_sha" = "$published"; then
+      # A tag published from now on carries the installable set rather than the
+      # commit made here, and that is still the tag it was made from.
       present=$((present + 1))
     else
       moved="${moved} ${tag} (GitHub $(printf '%.7s' "$remote_sha") would become $(printf '%.7s' "$local_sha"))"
