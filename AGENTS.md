@@ -8,8 +8,10 @@
 
 ## Style
 
-- The control is a flat row: period caption on the left, date in the middle, arrow buttons on the right. No outer pill, no segment borders, no divider under the row.
-- Take every colour, spacing, radius and font size from Home Assistant theme variables (`--secondary-background-color`, `--divider-color`, `--secondary-text-color`, `--ha-space-*`, `--ha-font-size-*`, `--ha-button-border-radius`), with a literal fallback only where Home Assistant has no variable. Hard-coded colours make the card unthemeable.
+- The control is a flat row: period dropdown on the left, date in the middle, arrow buttons on the right. The row itself carries no frame of its own, and each control is styled the way Home Assistant styles it.
+- Take every colour, spacing, radius and font size from Home Assistant theme variables, with a literal fallback only where Home Assistant has no variable. Hard-coded colours make the card unthemeable.
+- Prefer the current design tokens and fall back to the long-standing ones, so a card still looks right on an older Home Assistant: `--ha-button-height` before `--ha-space-*`, `--ha-button-border-radius` and `--ha-border-radius-*` before a fixed radius, `--ha-color-fill-neutral-*-resting` and `-hover` before `--secondary-background-color` and `--divider-color`, `--ha-color-border-neutral-*` before `--divider-color`, `--ha-color-focus` before `--primary-color`, `--ha-animation-duration-fast` for hover timing, `--ha-font-size-*` and `--ha-font-weight-*` for type. Home Assistant's own hover changes a colour in 150ms, so let it, and drop the transition under `prefers-reduced-motion`.
+- Size the controls of a row from one variable so they share a height, and let it default to Home Assistant's own control height rather than a number.
 - Expose what a themer would want to change as `--ha-energy-period-card-*` variables on `:host` and keep the README table in step with them.
 
 ## Where this card lives
