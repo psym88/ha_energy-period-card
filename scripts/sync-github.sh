@@ -212,6 +212,14 @@ else
       # A tag published from now on carries the installable set rather than the
       # commit made here, and that is still the tag it was made from.
       present=$((present + 1))
+    elif github fetch --quiet --no-tags --depth=2 "$github_url" \
+        "+refs/tags/${tag}:refs/remotes/github/${tag}" &&
+      test "$(git rev-parse --quiet --verify "refs/remotes/github/${tag}^" || true)" = "$local_sha"; then
+      # GitHub holds a published copy of this commit: a commit with this one as its
+      # parent, made here on an earlier run. It keeps the files it was published
+      # with, because a published tag never moves even when the include list
+      # changes later. Anything else on that sha is somebody moving the tag.
+      present=$((present + 1))
     else
       moved="${moved} ${tag} (GitHub $(printf '%.7s' "$remote_sha") would become $(printf '%.7s' "$local_sha"))"
     fi
