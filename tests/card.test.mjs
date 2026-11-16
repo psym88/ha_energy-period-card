@@ -204,11 +204,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select \{[^}]*color: var\(--ha-energy-period-card-select-color\);/
-  );
-  assert.match(
-    card.shadowRoot.innerHTML,
-    /\.period-select \{[^}]*text-transform: uppercase;/
+    /\.period-select \{[^}]*height: var\(--ha-energy-period-card-control-height, 40px\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -216,11 +212,23 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[^}]*border-right: 2px solid currentColor;[^}]*translateY\(-65%\) rotate\(45deg\)/
+    /\.period-select select \{[^}]*border: var\(--ha-border-width-sm, 1px\) solid\s+var\(--ha-energy-period-card-field-border-color\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-nav button\[data-shift\] \{[^}]*width: var\(--ha-energy-period-card-nav-size, 30px\);[^}]*background: var\(--ha-energy-period-card-nav-background\)/
+    /\.period-select select \{[^}]*color: var\(--ha-energy-period-card-select-color\);[^}]*font-size: var\(--ha-font-size-m, 14px\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-select select:focus-visible \{[^}]*border-color: var\(--ha-energy-period-card-field-focus-border-color\);[^}]*outline: none;/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-select::after \{[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*translateY\(-65%\) rotate\(45deg\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-nav button\[data-shift\] \{[^}]*width: var\(--ha-energy-period-card-control-height, 40px\);[^}]*height: var\(--ha-energy-period-card-control-height, 40px\);[^}]*border-radius: var\(--ha-energy-period-card-nav-radius\);[^}]*background: var\(--ha-energy-period-card-nav-background\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -233,20 +241,32 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.date-range \{[^}]*font-size: var\(--ha-font-size-l, 16px\);[^}]*line-height: 1\.05/
+    /\.date-range \{[^}]*height: var\(--ha-energy-period-card-control-height, 40px\);/
   );
   assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-nav-background:/
+    /--ha-energy-period-card-nav-background:[\s\S]*?--ha-color-fill-neutral-normal-resting/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /var\(--secondary-background-color, var\(--ha-color-surface-low\)\)/
+    /--ha-energy-period-card-nav-hover-background:[\s\S]*?--ha-color-fill-neutral-normal-hover/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-nav-radius:[\s\S]*?var\(--ha-button-border-radius, 9px\)/
+    /\.date-nav button\[data-shift\]:hover:not\(:disabled\) \{[^}]*color: var\(--ha-energy-period-card-nav-hover-color\);[^}]*background: var\(--ha-energy-period-card-nav-hover-background\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-nav button\[data-shift\] \{[^}]*transition:\s+background-color var\(--ha-energy-period-card-transition\),\s+color var\(--ha-energy-period-card-transition\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-nav-radius:[\s\S]*?var\(--ha-button-border-radius, var\(--ha-border-radius-pill, 999px\)\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?transition: none;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -261,7 +281,33 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   assert.doesNotMatch(card.shadowRoot.innerHTML, /border-right: 1px solid/);
 });
 
-test("keeps the period dropdown flat while the card is busy", () => {
+test("gives every control in the row the same height", () => {
+  const card = new Card();
+  card._hass = createHass();
+  card.setConfig({ collection_key: "energy_1" });
+
+  const heights = [
+    /\.date-navigation \{[^}]*\}/,
+    /\.period-select \{[^}]*\}/,
+    /\.date-range \{[^}]*\}/,
+    /\.date-nav button\[data-shift\] \{[^}]*\}/,
+  ].map((rule) => card.shadowRoot.innerHTML.match(rule)?.[0]);
+
+  for (const styles of heights) {
+    assert.ok(styles, "every control has its own style rule");
+    assert.match(
+      styles,
+      /var\(--ha-energy-period-card-control-height, 40px\)/,
+      "controls share one height variable"
+    );
+  }
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-control-height: var\(--ha-button-height, 40px\);/
+  );
+});
+
+test("keeps the period dropdown dimmed while the card is busy", () => {
   const card = new Card();
   card.setConfig({ collection_key: "energy_1" });
 
@@ -275,7 +321,7 @@ test("keeps the period dropdown flat while the card is busy", () => {
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select:hover:not\(\[data-disabled="true"\]\)/
+    /\.period-select select:hover:not\(:disabled\)/
   );
 });
 

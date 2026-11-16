@@ -64,13 +64,21 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 
 | Variable | Purpose |
 | --- | --- |
-| `--ha-energy-period-card-select-color` | Period caption and its caret |
-| `--ha-energy-period-card-select-letter-spacing` | Letter spacing of the period caption |
-| `--ha-energy-period-card-nav-background` | Date arrow button background |
-| `--ha-energy-period-card-nav-color` | Date arrow glyph |
-| `--ha-energy-period-card-nav-hover-background` | Date arrow hover background |
-| `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date label |
-| `--ha-energy-period-card-nav-size` | Width and height of the arrow buttons |
+| `--ha-energy-period-card-control-height` | Height of the dropdown, the date and the arrow buttons |
+| `--ha-energy-period-card-select-color` | Text of the period dropdown |
+| `--ha-energy-period-card-field-background` | Background of the period dropdown |
+| `--ha-energy-period-card-field-border-color` | Border of the period dropdown |
+| `--ha-energy-period-card-field-hover-border-color` | Border of the period dropdown on hover |
+| `--ha-energy-period-card-field-focus-border-color` | Border of the period dropdown with keyboard focus |
+| `--ha-energy-period-card-field-radius` | Corner radius of the period dropdown |
+| `--ha-energy-period-card-nav-background` | Arrow button background |
+| `--ha-energy-period-card-nav-color` | Arrow glyph |
+| `--ha-energy-period-card-nav-hover-background` | Arrow button background on hover |
+| `--ha-energy-period-card-nav-hover-color` | Arrow glyph on hover |
+| `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date |
+| `--ha-energy-period-card-transition` | How the hover colours change |
+
+The defaults follow Home Assistant's own controls: the height comes from `--ha-button-height`, the arrow radius from `--ha-button-border-radius`, the dropdown keeps the outlined field look with `--card-background-color` and a border, and hover uses Home Assistant's neutral fill tokens.
 
 Example:
 
@@ -78,8 +86,8 @@ Example:
 card_mod:
   style: |
     ha-card {
+      --ha-energy-period-card-control-height: 44px;
       --ha-energy-period-card-nav-background: transparent;
-      --ha-energy-period-card-nav-size: 26px;
     }
 ```
 
