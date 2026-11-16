@@ -91,9 +91,9 @@ published_commit() {
   fi
   name=$(git show "${tree}:hacs.json" | json filename)
   if test -n "$name"; then
-    if git cat-file -e "${tree}:${name}" 2>/dev/null; then
-      :
-    elif git cat-file -e "${tree}:themes/${name}" 2>/dev/null; then
+    if git cat-file -e "${tree}:${name}" 2>/dev/null ||
+      git cat-file -e "${tree}:themes/${name}" 2>/dev/null ||
+      git cat-file -e "${tree}:dist/${name}" 2>/dev/null; then
       :
     else
       echo "The published copy of ${source} lost ${name}, which hacs.json names." >&2
@@ -261,22 +261,23 @@ echo '::endgroup::'
 
 echo '::group::Release asset'
 # HACS installs the file hacs.json names, so that file is the asset of the
-# release: a card keeps it next to hacs.json, a theme under themes/. An asset the
-# release already carries is left alone, because the download count hangs off the
-# asset itself and a re-uploaded one counts from zero again.
+# release: a card keeps it next to hacs.json, a theme under themes/ and a built
+# card under dist/. An asset the release already carries is left alone, because
+# the download count hangs off the asset itself and a re-uploaded one counts from
+# zero again.
 asset_name=$(printf '%s' "$(git show "refs/tags/${release_tag}:hacs.json" 2>/dev/null || true)" | json filename)
 if test -z "$asset_name"; then
   echo "hacs.json at ${release_tag} names no filename, so there is no asset to upload."
 else
   asset_path=""
-  for candidate in "${asset_name}" "themes/${asset_name}"; do
+  for candidate in "${asset_name}" "themes/${asset_name}" "dist/${asset_name}"; do
     if git cat-file -e "refs/tags/${release_tag}:${candidate}" 2>/dev/null; then
       asset_path="${candidate}"
       break
     fi
   done
   if test -z "$asset_path"; then
-    echo "hacs.json names ${asset_name}, but ${release_tag} carries it in neither place." >&2
+    echo "hacs.json names ${asset_name}, but ${release_tag} carries it beside itself, under themes/ or under dist/." >&2
     exit 1
   fi
   release_id=$(printf '%s' "$created" | json id)
