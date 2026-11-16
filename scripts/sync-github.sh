@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Syncs this card and one of its releases to the public GitHub repository.
+# Syncs this repository and one of its releases to the public GitHub repository.
 #
 # Forgejo is the source of truth. GitHub gets the branch and the tags that exist
-# here, plus the release as a GitHub release object with the card file as its
-# asset: HACS installs the card from that asset and the download count users see
-# is counted on it. Nothing is ever deleted on GitHub, a published tag never
-# moves, and an asset a release already carries is left where it is, because
-# uploading it again would reset the downloads it has.
+# here, plus the release as a GitHub release object with the file HACS installs
+# as its asset, because that asset is what a download count on GitHub counts.
+# Nothing is ever deleted on GitHub, a published tag never moves, and an asset a
+# release already carries stays where it is: uploading it again starts its count
+# at zero.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -168,15 +168,24 @@ echo '::endgroup::'
 
 echo '::group::Release asset'
 # HACS installs the file hacs.json names, so that file is the asset of the
-# release. An asset the release already carries is left alone: the download count
-# hangs off the asset itself and a re-uploaded one counts from zero again.
-card_file=$(printf '%s' "$(git show "refs/tags/${release_tag}:hacs.json" 2>/dev/null || true)" | json filename)
-if test -z "$card_file"; then
+# release: a card keeps it next to hacs.json, a theme under themes/. An asset the
+# release already carries is left alone, because the download count hangs off the
+# asset itself and a re-uploaded one counts from zero again.
+asset_name=$(printf '%s' "$(git show "refs/tags/${release_tag}:hacs.json" 2>/dev/null || true)" | json filename)
+if test -z "$asset_name"; then
   echo "hacs.json at ${release_tag} names no filename, so there is no asset to upload."
-elif ! git cat-file -e "refs/tags/${release_tag}:${card_file}" 2>/dev/null; then
-  echo "hacs.json names ${card_file}, but ${release_tag} does not carry that file." >&2
-  exit 1
 else
+  asset_path=""
+  for candidate in "${asset_name}" "themes/${asset_name}"; do
+    if git cat-file -e "refs/tags/${release_tag}:${candidate}" 2>/dev/null; then
+      asset_path="${candidate}"
+      break
+    fi
+  done
+  if test -z "$asset_path"; then
+    echo "hacs.json names ${asset_name}, but ${release_tag} carries it in neither place." >&2
+    exit 1
+  fi
   release_id=$(printf '%s' "$created" | json id)
   existing_asset=$(printf '%s' "$created" | node -e '
     let input = "";
@@ -186,21 +195,22 @@ else
       const asset = (release.assets || []).find((item) => item.name === wanted);
       process.stdout.write(asset ? String(asset.id) : "");
     });
-  ' "$card_file")
+  ' "$asset_name")
   if test -n "$existing_asset"; then
-    echo "Release ${release_tag} already carries ${card_file} on GitHub, its download count stays as it is."
+    echo "Release ${release_tag} already carries ${asset_name} on GitHub, its download count stays as it is."
   else
-    case "$card_file" in
+    case "$asset_name" in
       *.js) asset_type="application/javascript" ;;
+      *.yaml | *.yml) asset_type="application/yaml" ;;
       *) asset_type="application/octet-stream" ;;
     esac
     asset_file=$(mktemp)
-    git show "refs/tags/${release_tag}:${card_file}" >"$asset_file"
+    git show "refs/tags/${release_tag}:${asset_path}" >"$asset_file"
     uploaded=$(curl -fsS -X POST \
       -H "Authorization: Bearer ${GH_RELEASE_TOKEN}" -H "Accept: application/vnd.github+json" \
       -H "Content-Type: ${asset_type}" \
       --data-binary "@${asset_file}" \
-      "${github_uploads}/releases/${release_id}/assets?name=${card_file}")
+      "${github_uploads}/releases/${release_id}/assets?name=${asset_name}")
     asset_url=$(printf '%s' "$uploaded" | json url)
     asset_size=$(printf '%s' "$uploaded" | json size)
     # Reading the asset back is what shows GitHub stored the file byte for byte.
@@ -208,14 +218,14 @@ else
       "$asset_url" >"${asset_file}.read-back"
     if test "$(sha256sum "$asset_file" | cut -d' ' -f1)" != \
       "$(sha256sum "${asset_file}.read-back" | cut -d' ' -f1)"; then
-      echo "GitHub stored ${card_file} with a checksum that does not match ${release_tag}" >&2
+      echo "GitHub stored ${asset_name} with a checksum that does not match ${release_tag}" >&2
       rm -f "$asset_file" "${asset_file}.read-back"
       exit 1
     fi
     rm -f "$asset_file" "${asset_file}.read-back"
-    echo "Uploaded ${card_file} (${asset_size} bytes) as the asset of ${release_tag}, the copy on GitHub matches."
+    echo "Uploaded ${asset_name} (${asset_size} bytes) as the asset of ${release_tag}, the copy on GitHub matches."
     if test -n "${GITHUB_STEP_SUMMARY:-}"; then
-      printf '%s\n' "${card_file} (${asset_size} bytes) is the downloadable asset of this release." \
+      printf '%s\n' "${asset_name} (${asset_size} bytes) is the downloadable asset of this release." \
         >>"$GITHUB_STEP_SUMMARY"
     fi
   fi
