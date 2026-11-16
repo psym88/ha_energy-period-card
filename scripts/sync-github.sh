@@ -199,9 +199,8 @@ else
   if test -n "$existing_asset"; then
     echo "Release ${release_tag} already carries ${asset_name} on GitHub, its download count stays as it is."
   else
-    # GitHub names the media types it takes after its own list and answers a type
-    # that is not on it with a 400 and no message at all, so anything that is not
-    # one of these is sent as a plain stream of bytes.
+    # The media type is what GitHub keeps on the asset. These are the types the
+    # releases of these repositories already carry; anything else goes as bytes.
     case "$asset_name" in
       *.js) asset_type="application/javascript" ;;
       *.zip) asset_type="application/zip" ;;
@@ -210,9 +209,12 @@ else
     asset_file=$(mktemp)
     git show "refs/tags/${release_tag}:${asset_path}" >"$asset_file"
     answer=$(mktemp)
+    # curl asks for a 100-continue as soon as a body is larger than a kilobyte,
+    # and the upload host answers that question with an empty 400 instead of an
+    # answer, so the ask is dropped and the file goes in one piece.
     status=$(curl -sS -o "$answer" -w '%{http_code}' -X POST \
       -H "Authorization: Bearer ${GH_RELEASE_TOKEN}" -H "Accept: application/vnd.github+json" \
-      -H "Content-Type: ${asset_type}" \
+      -H "Content-Type: ${asset_type}" -H "Expect:" \
       --data-binary "@${asset_file}" \
       "${github_uploads}/releases/${release_id}/assets?name=${asset_name}")
     case "$status" in
