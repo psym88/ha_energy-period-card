@@ -180,17 +180,25 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   card._rangeEnd = new Date(2026, 6, 31, 23, 59, 59);
   card.setConfig({ collection_key: "energy_1" });
 
-  assert.match(card.shadowRoot.innerHTML, /<select/);
+  assert.match(card.shadowRoot.innerHTML, /class="period-trigger"/);
   assert.match(card.shadowRoot.innerHTML, /aria-label="Energy period"/);
-  assert.match(card.shadowRoot.innerHTML, /<option value="today"/);
-  assert.match(card.shadowRoot.innerHTML, /<option value="week"/);
-  assert.match(card.shadowRoot.innerHTML, /<option value="month"/);
-  assert.match(card.shadowRoot.innerHTML, /<option value="year"/);
+  assert.match(card.shadowRoot.innerHTML, /aria-haspopup="menu"/);
+  assert.match(card.shadowRoot.innerHTML, /aria-expanded="false"/);
+  assert.match(card.shadowRoot.innerHTML, /role="menu"/);
+  assert.match(card.shadowRoot.innerHTML, /data-period="today"/);
+  assert.match(card.shadowRoot.innerHTML, /data-period="week"/);
+  assert.match(card.shadowRoot.innerHTML, /data-period="month"/);
+  assert.match(card.shadowRoot.innerHTML, /data-period="year"/);
   assert.doesNotMatch(card.shadowRoot.innerHTML, /Select period/);
-  assert.match(card.shadowRoot.innerHTML, />Day<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />Week<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />Month<\/option>/);
-  assert.match(card.shadowRoot.innerHTML, />Year<\/option>/);
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /<select/);
+  assert.match(card.shadowRoot.innerHTML, /role="menuitem"/);
+  assert.match(card.shadowRoot.innerHTML, /aria-posinset="1"/);
+  assert.match(card.shadowRoot.innerHTML, /aria-setsize="4"/);
+  assert.match(card.shadowRoot.innerHTML, /aria-expanded="false"/);
+  assert.match(card.shadowRoot.innerHTML, />Day<\/button>/);
+  assert.match(card.shadowRoot.innerHTML, />Week<\/button>/);
+  assert.match(card.shadowRoot.innerHTML, />Month<\/button>/);
+  assert.match(card.shadowRoot.innerHTML, />Year<\/button>/);
   assert.match(
     card.shadowRoot.innerHTML,
     /<button[\s\S]*?class="date-range"[\s\S]*?data-today/
@@ -208,27 +216,27 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*appearance: none;[^}]*background-image: none;/
+    /\.period-trigger \{[^}]*appearance: none;[^}]*background-image: none;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*border: 0;[^}]*border-radius: var\(--ha-energy-period-card-field-radius\);/
+    /\.period-trigger \{[^}]*border: 0;[^}]*border-radius: var\(--ha-energy-period-card-field-radius\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*background-color: var\(--ha-energy-period-card-field-background\);/
+    /\.period-trigger \{[^}]*background-color: var\(--ha-energy-period-card-field-background\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select \{[^}]*color: inherit;[^}]*font-size: var\(--ha-font-size-m, 14px\);/
+    /\.period-trigger \{[^}]*color: inherit;[^}]*font-size: var\(--ha-font-size-m, 14px\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select:hover:not\(:disabled\) \{[^}]*background-color: var\(--ha-energy-period-card-field-hover-background\);/
+    /\.period-trigger:hover:not\(:disabled\) \{[^}]*background-color: var\(--ha-energy-period-card-field-hover-background\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select:focus-visible \{[^}]*outline: none;[^}]*box-shadow: 0 0 0 2px var\(--ha-energy-period-card-field-focus-color\);/
+    /\.period-trigger:focus-visible \{[^}]*outline: none;[^}]*box-shadow: 0 0 0 2px var\(--ha-energy-period-card-field-focus-color\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -240,7 +248,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /<div class="date-navigation">[\s\S]*?<div[\s\S]*?class="period-select"[\s\S]*?<select[\s\S]*?data-period[\s\S]*?class="date-range"[\s\S]*?<div class="date-nav">[\s\S]*?data-shift="previous"[\s\S]*?data-shift="next"/
+    /<div class="date-navigation">[\s\S]*?<div[\s\S]*?class="period-select"[\s\S]*?<button[\s\S]*?data-period-trigger[\s\S]*?class="date-range"[\s\S]*?<div class="date-nav">[\s\S]*?data-shift="previous"[\s\S]*?data-shift="next"/
   );
   assert.match(card.shadowRoot.innerHTML, /text-align: center/);
   assert.match(
@@ -251,7 +259,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
     card.shadowRoot.innerHTML,
     /\.date-range \{[^}]*height: var\(--ha-energy-period-card-control-height, 40px\);/
   );
-  assert.match(card.shadowRoot.innerHTML, /select:focus-visible/);
+  assert.match(card.shadowRoot.innerHTML, /\.period-trigger:focus-visible/);
   assert.match(
     card.shadowRoot.innerHTML,
     /--ha-energy-period-card-nav-background:[\s\S]*?--ha-color-fill-neutral-normal-resting/
@@ -290,7 +298,59 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?transition: none;/
+    /--ha-energy-period-card-menu-background: var\(--card-background-color\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-menu-border-color:[\s\S]*?--ha-color-border-neutral-quiet/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-menu-radius: var\(--ha-border-radius-md, 8px\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-menu-padding: var\(--ha-space-1, 4px\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-option-hover-background:[\s\S]*?--ha-color-fill-neutral-normal-resting/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-option-selected-background:[\s\S]*?--ha-color-fill-primary-quiet-resting/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-menu \{[^}]*position: fixed;[^}]*background: var\(--ha-energy-period-card-menu-background\);[^}]*box-shadow: var\(--ha-energy-period-card-menu-shadow\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-menu\[data-open="false"\] \{\s*display: none;/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-menu\[data-open="true"\] \{[^}]*animation: period-menu-open\s+var\(--ha-animation-duration-instant, 75ms\) ease;/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /@keyframes period-menu-open \{\s*from \{\s*opacity: 0;\s*transform: scale\(0\.9\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-option \{[^}]*min-height: var\(--ha-space-10, 40px\);[^}]*border-radius: var\(--ha-border-radius-sm, 4px\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-option:hover,\s*\.period-option:focus-visible \{[^}]*background-color: var\(--ha-energy-period-card-option-hover-background\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-option\[data-selected="true"\] \{[^}]*color: var\(--primary-color\);[^}]*background-color: var\(\s*--ha-energy-period-card-option-selected-background\s*\);[^}]*font-weight: var\(--ha-font-weight-medium, 500\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?transition: none;[\s\S]*?animation: none;/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -345,7 +405,7 @@ test("keeps the period dropdown dimmed while the card is busy", () => {
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select select:hover:not\(:disabled\)/
+    /\.period-trigger:hover:not\(:disabled\)/
   );
 });
 

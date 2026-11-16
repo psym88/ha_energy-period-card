@@ -339,6 +339,7 @@ class HaEnergyPeriodCard extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._releaseMenu();
     window.clearTimeout(this._syncTimer);
     this._syncTimer = undefined;
     window.clearInterval(this._syncInterval);
@@ -540,11 +541,25 @@ class HaEnergyPeriodCard extends HTMLElement {
     if (periodSelect) {
       periodSelect.dataset.disabled = disabled ? "true" : "false";
     }
-    const select = this.shadowRoot.querySelector?.("select[data-period]");
-    if (select) {
-      select.value = this._active || "";
-      select.disabled = disabled;
+    const trigger = this.shadowRoot.querySelector?.(".period-trigger");
+    if (trigger) {
+      const labels = Object.fromEntries(
+        PERIODS.map((period) => [period, this._localizePeriod(period)])
+      );
+      trigger.dataset.value = this._active || "";
+      trigger.textContent = labels[this._active] || labels[PERIODS[0]];
+      trigger.disabled = disabled;
+      if (disabled) this._closeMenu(false);
     }
+    this.shadowRoot
+      .querySelectorAll(".period-option")
+      .forEach((option) => {
+        if (option.dataset.period === this._active) {
+          option.dataset.selected = "true";
+        } else {
+          delete option.dataset.selected;
+        }
+      });
     const dateRange = this.shadowRoot.querySelector?.(".date-range");
     if (dateRange) {
       dateRange.textContent = this._formatDateRange();
@@ -556,7 +571,146 @@ class HaEnergyPeriodCard extends HTMLElement {
       .forEach((button) => (button.disabled = disabled || !this._active));
   }
 
+  _menuElements() {
+    const trigger = this.shadowRoot.querySelector?.(".period-trigger");
+    const menu = this.shadowRoot.querySelector?.(".period-menu");
+    if (!trigger || !menu) return undefined;
+    return {
+      trigger,
+      menu,
+      options: Array.from(this.shadowRoot.querySelectorAll(".period-option")),
+    };
+  }
+
+  _positionMenu(menu, trigger) {
+    const box = trigger.getBoundingClientRect?.();
+    if (!box) return;
+    const gap = 4;
+    const edge = 10;
+    menu.style.left = "0px";
+    menu.style.top = "0px";
+    menu.style.minWidth = `${Math.round(box.width)}px`;
+    const width = menu.offsetWidth || box.width;
+    const height = menu.offsetHeight || 0;
+    const opensUpwards =
+      box.bottom + gap + height > window.innerHeight - edge &&
+      box.top - gap - height > edge;
+    menu.style.left = `${Math.round(
+      Math.max(edge, Math.min(box.left, window.innerWidth - edge - width))
+    )}px`;
+    menu.style.top = `${Math.round(
+      opensUpwards ? box.top - gap - height : box.bottom + gap
+    )}px`;
+  }
+
+  _releaseMenu() {
+    if (!this._menuListeners) return;
+    this._menuListeners.forEach(([target, type, handler]) =>
+      target.removeEventListener(type, handler, true)
+    );
+    this._menuListeners = undefined;
+  }
+
+  _listenMenu(target, type, handler) {
+    target.addEventListener(type, handler, true);
+    this._menuListeners = this._menuListeners || [];
+    this._menuListeners.push([target, type, handler]);
+  }
+
+  _openMenu() {
+    const elements = this._menuElements();
+    if (!elements || elements.trigger.disabled) return;
+    const { trigger, menu, options } = elements;
+    menu.dataset.open = "true";
+    trigger.setAttribute("aria-expanded", "true");
+    this._positionMenu(menu, trigger);
+    const selected =
+      options.find((option) => option.dataset.selected === "true") ||
+      options[0];
+    selected?.focus?.();
+    if (!this._menuListeners) {
+      const outside = (event) => {
+        const path = event.composedPath?.() || [];
+        if (path.includes(menu) || path.includes(trigger)) return;
+        this._closeMenu(false);
+      };
+      const reposition = () => this._positionMenu(menu, trigger);
+      this._listenMenu(document, "pointerdown", outside);
+      this._listenMenu(window, "scroll", reposition);
+      this._listenMenu(window, "resize", reposition);
+    }
+  }
+
+  _closeMenu(restoreFocus) {
+    const elements = this._menuElements();
+    if (!elements) return;
+    const { trigger, menu } = elements;
+    if (menu.dataset.open !== "true") return;
+    menu.dataset.open = "false";
+    trigger.setAttribute("aria-expanded", "false");
+    this._releaseMenu();
+    if (restoreFocus) trigger.focus?.();
+  }
+
+  _focusOption(options, index) {
+    if (!options.length) return;
+    const bounded = ((index % options.length) + options.length) % options.length;
+    options[bounded]?.focus?.();
+  }
+
+  _focusedOptionIndex(options) {
+    const active = this.shadowRoot.activeElement ?? document.activeElement;
+    return options.indexOf(active);
+  }
+
+  _handleMenuKeydown(event) {
+    const elements = this._menuElements();
+    if (!elements || elements.menu.dataset.open !== "true") return;
+    const options = elements.options;
+    const index = this._focusedOptionIndex(options);
+
+    switch (event.key) {
+      case "Escape":
+        event.preventDefault();
+        this._closeMenu(true);
+        return;
+      case "Tab":
+        this._closeMenu(false);
+        return;
+      case "ArrowDown":
+        event.preventDefault();
+        this._focusOption(options, index + 1);
+        return;
+      case "ArrowUp":
+        event.preventDefault();
+        this._focusOption(options, index - 1);
+        return;
+      case "Home":
+        event.preventDefault();
+        this._focusOption(options, 0);
+        return;
+      case "End":
+        event.preventDefault();
+        this._focusOption(options, options.length - 1);
+        return;
+      default:
+        if (event.key.length !== 1) return;
+        this._focusTypedOption(options, index, event.key.toLowerCase());
+    }
+  }
+
+  _focusTypedOption(options, index, typed) {
+    for (let step = 1; step <= options.length; step += 1) {
+      const option = options[(index + step + options.length) % options.length];
+      if (option?.textContent.trim().toLowerCase().startsWith(typed)) {
+        this._focusOption(options, (index + step + options.length) % options.length);
+        return;
+      }
+    }
+  }
+
   _render() {
+    this._releaseMenu();
     const tag = this._config.show_card ? "ha-card" : "div";
     const labels = Object.fromEntries(
       PERIODS.map((period) => [period, this._localizePeriod(period)])
@@ -592,6 +746,31 @@ class HaEnergyPeriodCard extends HTMLElement {
             var(--feature-color, var(--primary-color, var(--ha-color-focus)));
           --ha-energy-period-card-field-radius:
             var(--feature-border-radius, var(--ha-border-radius-lg, 12px));
+          --ha-energy-period-card-menu-background: var(--card-background-color);
+          --ha-energy-period-card-menu-border-color:
+            var(--ha-color-border-neutral-quiet, var(--divider-color));
+          --ha-energy-period-card-menu-radius: var(--ha-border-radius-md, 8px);
+          --ha-energy-period-card-menu-padding: var(--ha-space-1, 4px);
+          --ha-energy-period-card-menu-shadow:
+            var(--ha-box-shadow-m, 0 3px 6px 0 color-mix(
+                  in srgb,
+                  var(--disabled-color, #000) 30%,
+                  transparent
+                ));
+          --ha-energy-period-card-option-hover-background:
+            var(--ha-color-fill-neutral-normal-resting, var(--divider-color));
+          --ha-energy-period-card-option-selected-background:
+            var(--ha-color-fill-primary-quiet-resting, color-mix(
+                  in srgb,
+                  var(--primary-color, var(--accent-color)) 12%,
+                  transparent
+                ));
+          --ha-energy-period-card-option-selected-hover-background:
+            var(--ha-color-fill-primary-quiet-hover, color-mix(
+                  in srgb,
+                  var(--primary-color, var(--accent-color)) 18%,
+                  transparent
+                ));
           --ha-energy-period-card-nav-background:
             var(--ha-color-fill-neutral-normal-resting,
               var(--secondary-background-color));
@@ -651,10 +830,11 @@ class HaEnergyPeriodCard extends HTMLElement {
           pointer-events: none;
           transform: translateY(-70%) rotate(45deg);
         }
-        .period-select select {
+        .period-trigger {
           appearance: none;
           -webkit-appearance: none;
           box-sizing: border-box;
+          display: block;
           min-width: 0;
           max-width: 100%;
           height: 100%;
@@ -670,18 +850,98 @@ class HaEnergyPeriodCard extends HTMLElement {
           font-size: var(--ha-font-size-m, 14px);
           font-weight: var(--ha-font-weight-normal, 400);
           letter-spacing: 0.25px;
+          text-align: left;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
           cursor: pointer;
           transition: background-color var(--ha-energy-period-card-transition);
         }
-        .period-select select:hover:not(:disabled) {
+        .period-trigger:hover:not(:disabled) {
           background-color: var(--ha-energy-period-card-field-hover-background);
         }
-        .period-select select:focus-visible {
+        .period-trigger:focus-visible {
           outline: none;
           box-shadow: 0 0 0 2px var(--ha-energy-period-card-field-focus-color);
         }
-        .period-select select:disabled {
+        .period-trigger:disabled {
           cursor: wait;
+        }
+        .period-menu {
+          position: fixed;
+          z-index: 3;
+          box-sizing: border-box;
+          max-height: var(--ha-energy-period-card-menu-height, 15em);
+          overflow-y: auto;
+          padding: var(--ha-energy-period-card-menu-padding, 4px);
+          border: var(--ha-border-width-sm, 1px) solid
+            var(--ha-energy-period-card-menu-border-color);
+          border-radius: var(--ha-energy-period-card-menu-radius);
+          color: var(--primary-text-color);
+          background: var(--ha-energy-period-card-menu-background);
+          box-shadow: var(--ha-energy-period-card-menu-shadow);
+          font-size: var(--ha-dropdown-font-size, var(--ha-font-size-m, 14px));
+          line-height: var(--ha-line-height-condensed, 1.2);
+          transform-origin: top left;
+        }
+        .period-menu[data-open="false"] {
+          display: none;
+        }
+        .period-menu[data-open="true"] {
+          display: block;
+          animation: period-menu-open
+            var(--ha-animation-duration-instant, 75ms) ease;
+        }
+        @keyframes period-menu-open {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+        .period-option {
+          display: flex;
+          align-items: center;
+          gap: 0.75em;
+          width: 100%;
+          box-sizing: border-box;
+          min-height: var(--ha-space-10, 40px);
+          padding: 0.5em var(--ha-space-4, 16px);
+          border: 0;
+          border-radius: var(--ha-border-radius-sm, 4px);
+          color: var(--primary-text-color);
+          background: transparent;
+          font: inherit;
+          font-weight: var(--ha-font-weight-normal, 400);
+          text-align: left;
+          cursor: pointer;
+          transition: background-color var(--ha-energy-period-card-transition);
+        }
+        .period-option:hover,
+        .period-option:focus-visible {
+          color: var(--primary-text-color);
+          background-color: var(--ha-energy-period-card-option-hover-background);
+        }
+        .period-option:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px var(--ha-color-focus, var(--primary-color));
+        }
+        .period-option[data-selected="true"] {
+          color: var(--primary-color);
+          background-color: var(
+            --ha-energy-period-card-option-selected-background
+          );
+          font-weight: var(--ha-font-weight-medium, 500);
+        }
+        .period-option[data-selected="true"]:hover,
+        .period-option[data-selected="true"]:focus-visible {
+          color: var(--primary-color);
+          background-color: var(
+            --ha-energy-period-card-option-selected-hover-background
+          );
         }
         .date-range {
           flex: 1;
@@ -754,10 +1014,14 @@ class HaEnergyPeriodCard extends HTMLElement {
           opacity: var(--disabled-opacity, 0.55);
         }
         @media (prefers-reduced-motion: reduce) {
-          .period-select select,
+          .period-trigger,
+          .period-option,
           .date-range,
           .date-nav button[data-shift] {
             transition: none;
+          }
+          .period-menu[data-open="true"] {
+            animation: none;
           }
         }
         .error {
@@ -778,18 +1042,35 @@ class HaEnergyPeriodCard extends HTMLElement {
             class="period-select"
             data-disabled="${this._busy || !this._hass ? "true" : "false"}"
           >
-            <select
-              data-period
+            <button
+              type="button"
+              class="period-trigger"
+              data-period-trigger
+              aria-haspopup="menu"
+              aria-expanded="false"
               aria-label="Energy period"
               ${this._busy || !this._hass ? "disabled" : ""}
+            >${escapeHtml(labels[this._active] || labels[PERIODS[0]])}</button>
+            <div
+              class="period-menu"
+              role="menu"
+              aria-label="Energy period"
+              data-open="false"
             >
               ${PERIODS.map(
-                (period) =>
-                  `<option value="${period}" ${
-                    period === this._active ? "selected" : ""
-                  }>${escapeHtml(labels[period])}</option>`
+                (period, index) => `
+              <button
+                type="button"
+                class="period-option"
+                role="menuitem"
+                data-period="${period}"
+                aria-posinset="${index + 1}"
+                aria-setsize="${PERIODS.length}"
+                tabindex="-1"
+                ${period === this._active ? 'data-selected="true"' : ""}
+              >${escapeHtml(labels[period])}</button>`
               ).join("")}
-            </select>
+            </div>
           </div>
           <button
             type="button"
@@ -827,10 +1108,27 @@ class HaEnergyPeriodCard extends HTMLElement {
       this.shadowRoot.appendChild(this._adapter.selector);
     }
 
+    const trigger = this.shadowRoot.querySelector?.(".period-trigger");
+    trigger?.addEventListener("click", () => {
+      const menu = this.shadowRoot.querySelector?.(".period-menu");
+      if (menu?.dataset.open === "true") this._closeMenu(true);
+      else this._openMenu();
+    });
+    trigger?.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        this._openMenu();
+      }
+    });
+    const menu = this.shadowRoot.querySelector?.(".period-menu");
+    menu?.addEventListener("keydown", (event) => this._handleMenuKeydown(event));
     this.shadowRoot
-      .querySelector?.("select[data-period]")
-      ?.addEventListener("change", (event) =>
-        this._setPeriod(event.target.value)
+      .querySelectorAll(".period-option")
+      .forEach((option) =>
+        option.addEventListener("click", () => {
+          this._closeMenu(true);
+          this._setPeriod(option.dataset.period);
+        })
       );
     this.shadowRoot
       .querySelectorAll("button[data-shift]")

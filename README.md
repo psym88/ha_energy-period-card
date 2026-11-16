@@ -14,7 +14,8 @@ A compact Home Assistant dashboard card with a dropdown for selecting the Energy
 - Uses Home Assistant's existing relative labels for the current, previous, or next period when available
 - Falls back to an exact date or date range when Home Assistant has no matching relative label
 - Navigates backward or forward by one selected period with date arrows
-- Renders as a flat row: period caption on the left, date in the middle, arrow buttons on the right
+- Renders as a flat row: period dropdown on the left, date in the middle, arrow buttons on the right
+- Opens its options as the Home Assistant dropdown menu: a card-coloured panel, the current period marked in the primary colour, arrow keys, Home, End, type-ahead, Escape and Tab
 - Includes a built-in visual configuration form
 - Supports keyboard navigation, screen readers, and reduced-motion preferences
 - Detects incompatible Home Assistant Energy selector changes and shows an error
@@ -70,6 +71,15 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-field-hover-background` | Background of the period dropdown on hover |
 | `--ha-energy-period-card-field-focus-color` | Ring around the period dropdown with keyboard focus |
 | `--ha-energy-period-card-field-radius` | Corner radius of the period dropdown |
+| `--ha-energy-period-card-menu-background` | Background of the open option list |
+| `--ha-energy-period-card-menu-border-color` | Border of the open option list |
+| `--ha-energy-period-card-menu-radius` | Corner radius of the open option list |
+| `--ha-energy-period-card-menu-padding` | Space between the option list edge and its items |
+| `--ha-energy-period-card-menu-shadow` | Shadow under the open option list |
+| `--ha-energy-period-card-menu-height` | How tall the option list grows before it scrolls |
+| `--ha-energy-period-card-option-hover-background` | Option background on hover and keyboard focus |
+| `--ha-energy-period-card-option-selected-background` | Background of the current option |
+| `--ha-energy-period-card-option-selected-hover-background` | Background of the current option on hover |
 | `--ha-energy-period-card-nav-background` | Arrow button background |
 | `--ha-energy-period-card-nav-color` | Arrow glyph |
 | `--ha-energy-period-card-nav-hover-background` | Arrow button background on hover |
@@ -77,7 +87,7 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date |
 | `--ha-energy-period-card-transition` | How the hover colours change |
 
-The defaults follow Home Assistant's own controls: the height comes from `--feature-height` and then `--ha-button-height`, the period dropdown is the tinted, borderless control Home Assistant uses in tile features, and the arrows take Home Assistant's neutral fill tokens for resting and hover.
+The defaults follow Home Assistant's own controls: the height comes from `--feature-height` and then `--ha-button-height`, the period dropdown is the tinted, borderless control Home Assistant uses in tile features, the option list is its dropdown menu, and the arrows take Home Assistant's neutral fill tokens for resting and hover.
 
 Example:
 
