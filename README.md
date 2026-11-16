@@ -65,13 +65,15 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 
 | Variable | Purpose |
 | --- | --- |
-| `--ha-energy-period-card-control-height` | Height of the dropdown, the date and the arrow buttons |
+| `--ha-energy-period-card-control-height` | Height of the dropdown, the date and the arrow buttons; one spacing step above Home Assistant's own control height |
+| `--ha-energy-period-card-font-size` | Text of the dropdown, the date and the option list |
 | `--ha-energy-period-card-select-color` | Text of the period dropdown |
 | `--ha-energy-period-card-field-background` | Background of the period dropdown |
 | `--ha-energy-period-card-field-hover-background` | Background of the period dropdown on hover |
 | `--ha-energy-period-card-field-focus-color` | Ring around the period dropdown with keyboard focus |
 | `--ha-energy-period-card-field-radius` | Corner radius of the period dropdown |
-| `--ha-energy-period-card-caret-size` | Size of the arrow in the period dropdown |
+| `--ha-energy-period-card-caret-size` | Size of the arrow in the period dropdown; it defaults to 0.7em of the dropdown text |
+| `--ha-energy-period-card-nav-size` | Arrow glyph in the previous and next buttons |
 | `--ha-energy-period-card-menu-background` | Background of the open option list |
 | `--ha-energy-period-card-menu-border-color` | Border of the open option list |
 | `--ha-energy-period-card-menu-radius` | Corner radius of the open option list |
@@ -88,7 +90,7 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-nav-radius` | Corner radius of the arrow buttons and the date |
 | `--ha-energy-period-card-transition` | How the hover colours change |
 
-The defaults follow Home Assistant's own controls: the height comes from `--feature-height` and then `--ha-button-height`, the period dropdown is the tinted, borderless control Home Assistant uses in tile features, the option list is its dropdown menu, and the arrows take Home Assistant's neutral fill tokens for resting and hover.
+The defaults follow Home Assistant's own controls: the height comes from `--feature-height` and then `--ha-button-height`, one `--ha-space-2` step above it so the row reads as a touch target, the text is `--ha-font-size-l`, the period dropdown is the tinted, borderless control Home Assistant uses in tile features, the option list is its dropdown menu, and the arrows take Home Assistant's neutral fill tokens for resting and hover.
 
 Example:
 

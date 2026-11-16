@@ -228,7 +228,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-trigger \{[^}]*color: inherit;[^}]*font-size: var\(--ha-font-size-m, 14px\);/
+    /\.period-trigger \{[^}]*color: inherit;[^}]*font-size: var\(\s*--ha-energy-period-card-font-size,\s*var\(--ha-font-size-l, 16px\)\s*\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -248,7 +248,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-caret \{[^}]*width: var\(--ha-energy-period-card-caret-size, 10px\);[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*rotate\(45deg\)/
+    /\.period-caret \{[^}]*width: var\(--ha-energy-period-card-caret-size, 0\.7em\);[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*rotate\(45deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -400,7 +400,32 @@ test("gives every control in the row the same height", () => {
   }
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-control-height:\s*var\(--feature-height, var\(--ha-button-height, 40px\)\);/
+    /--ha-energy-period-card-control-height:\s*calc\(\s*var\(--feature-height, var\(--ha-button-height, 40px\)\) \+\s*var\(--ha-space-2, 8px\)\s*\);/,
+    "the row is one spacing step above Home Assistant's own control height"
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-font-size: var\(--ha-font-size-l, 16px\);/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /--ha-energy-period-card-caret-size: 0\.7em;/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-trigger \{[^}]*font-size: var\(\s*--ha-energy-period-card-font-size/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-range \{[^}]*font-size: var\(\s*--ha-energy-period-card-font-size/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.date-nav button\[data-shift\] \{[^}]*font-size: var\(\s*--ha-energy-period-card-nav-size/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-menu \{[^}]*font-size: var\(\s*--ha-dropdown-font-size,\s*var\(--ha-energy-period-card-font-size/
   );
 });
 

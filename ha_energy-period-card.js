@@ -740,7 +740,13 @@ class HaEnergyPeriodCard extends HTMLElement {
         :host {
           display: block;
           --ha-energy-period-card-control-height:
-            var(--feature-height, var(--ha-button-height, 40px));
+            calc(
+              var(--feature-height, var(--ha-button-height, 40px)) +
+                var(--ha-space-2, 8px)
+            );
+          --ha-energy-period-card-font-size: var(--ha-font-size-l, 16px);
+          --ha-energy-period-card-caret-size: 0.7em;
+          --ha-energy-period-card-nav-size: var(--ha-font-size-xl, 22px);
           --ha-energy-period-card-select-color: var(--primary-text-color);
           --ha-energy-period-card-field-background:
             color-mix(
@@ -848,7 +854,10 @@ class HaEnergyPeriodCard extends HTMLElement {
           background-color: var(--ha-energy-period-card-field-background);
           background-image: none;
           font: inherit;
-          font-size: var(--ha-font-size-m, 14px);
+          font-size: var(
+            --ha-energy-period-card-font-size,
+            var(--ha-font-size-l, 16px)
+          );
           font-weight: var(--ha-font-weight-normal, 400);
           letter-spacing: 0.25px;
           text-align: left;
@@ -864,8 +873,8 @@ class HaEnergyPeriodCard extends HTMLElement {
         }
         .period-caret {
           flex: none;
-          width: var(--ha-energy-period-card-caret-size, 10px);
-          height: var(--ha-energy-period-card-caret-size, 10px);
+          width: var(--ha-energy-period-card-caret-size, 0.7em);
+          height: var(--ha-energy-period-card-caret-size, 0.7em);
           border-right: 2px solid var(--secondary-text-color);
           border-bottom: 2px solid var(--secondary-text-color);
           transform: translateY(-25%) rotate(45deg);
@@ -893,7 +902,10 @@ class HaEnergyPeriodCard extends HTMLElement {
           color: var(--primary-text-color);
           background: var(--ha-energy-period-card-menu-background);
           box-shadow: var(--ha-energy-period-card-menu-shadow);
-          font-size: var(--ha-dropdown-font-size, var(--ha-font-size-m, 14px));
+          font-size: var(
+            --ha-dropdown-font-size,
+            var(--ha-energy-period-card-font-size, var(--ha-font-size-m, 14px))
+          );
           line-height: var(--ha-line-height-condensed, 1.2);
           transform-origin: top left;
         }
@@ -966,7 +978,10 @@ class HaEnergyPeriodCard extends HTMLElement {
           color: var(--primary-text-color);
           background: transparent;
           font: inherit;
-          font-size: var(--ha-font-size-m, 14px);
+          font-size: var(
+            --ha-energy-period-card-font-size,
+            var(--ha-font-size-l, 16px)
+          );
           font-weight: var(--ha-font-weight-medium, 500);
           line-height: var(--ha-line-height-condensed, 1.2);
           text-align: center;
@@ -1007,7 +1022,10 @@ class HaEnergyPeriodCard extends HTMLElement {
           color: var(--ha-energy-period-card-nav-color);
           background: var(--ha-energy-period-card-nav-background);
           font: inherit;
-          font-size: var(--ha-font-size-xl, 22px);
+          font-size: var(
+            --ha-energy-period-card-nav-size,
+            var(--ha-font-size-xl, 22px)
+          );
           line-height: 1;
           cursor: pointer;
           transition:
