@@ -206,11 +206,22 @@ else
     esac
     asset_file=$(mktemp)
     git show "refs/tags/${release_tag}:${asset_path}" >"$asset_file"
-    uploaded=$(curl -fsS -X POST \
+    answer=$(mktemp)
+    status=$(curl -sS -o "$answer" -w '%{http_code}' -X POST \
       -H "Authorization: Bearer ${GH_RELEASE_TOKEN}" -H "Accept: application/vnd.github+json" \
       -H "Content-Type: ${asset_type}" \
       --data-binary "@${asset_file}" \
       "${github_uploads}/releases/${release_id}/assets?name=${asset_name}")
+    case "$status" in
+      200 | 201) uploaded=$(cat "$answer") ;;
+      *)
+        echo "GitHub answered ${status} on the asset ${asset_name} of type ${asset_type}:" >&2
+        cat "$answer" >&2
+        rm -f "$asset_file" "$answer"
+        exit 1
+        ;;
+    esac
+    rm -f "$answer"
     asset_url=$(printf '%s' "$uploaded" | json url)
     asset_size=$(printf '%s' "$uploaded" | json size)
     # Reading the asset back is what shows GitHub stored the file byte for byte.
