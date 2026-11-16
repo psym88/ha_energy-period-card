@@ -240,8 +240,21 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-select::after \{[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*translateY\(-70%\) rotate\(45deg\)/
+    /\.period-trigger \{[^}]*display: flex;[^}]*gap: var\(--ha-space-2, 8px\);/
   );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-value \{[^}]*flex: 1;[^}]*text-overflow: ellipsis;/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /\.period-caret \{[^}]*width: var\(--ha-energy-period-card-caret-size, 10px\);[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*rotate\(45deg\)/
+  );
+  assert.match(
+    card.shadowRoot.innerHTML,
+    /class="period-value"[\s\S]*?<span class="period-caret" aria-hidden="true">/
+  );
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /\.period-select::after/);
   assert.match(
     card.shadowRoot.innerHTML,
     /\.date-nav button\[data-shift\] \{[^}]*width: var\(--ha-energy-period-card-control-height, 40px\);[^}]*height: var\(--ha-energy-period-card-control-height, 40px\);[^}]*border-radius: var\(--ha-energy-period-card-nav-radius\);[^}]*background: var\(--ha-energy-period-card-nav-background\)/

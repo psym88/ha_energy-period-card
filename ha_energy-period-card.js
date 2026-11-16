@@ -547,7 +547,10 @@ class HaEnergyPeriodCard extends HTMLElement {
         PERIODS.map((period) => [period, this._localizePeriod(period)])
       );
       trigger.dataset.value = this._active || "";
-      trigger.textContent = labels[this._active] || labels[PERIODS[0]];
+      const value = trigger.querySelector?.(".period-value");
+      if (value) {
+        value.textContent = labels[this._active] || labels[PERIODS[0]];
+      }
       trigger.disabled = disabled;
       if (disabled) this._closeMenu(false);
     }
@@ -590,16 +593,25 @@ class HaEnergyPeriodCard extends HTMLElement {
     menu.style.left = "0px";
     menu.style.top = "0px";
     menu.style.minWidth = `${Math.round(box.width)}px`;
+    // A Lovelace card is often the ancestor a transform anchors to, which
+    // makes fixed mean fixed to the card rather than to the viewport. The
+    // panel sitting at 0,0 reports that anchor, so the trigger is measured
+    // against it instead of against the viewport.
+    const anchor = menu.getBoundingClientRect?.();
+    const offsetX = anchor?.left || 0;
+    const offsetY = anchor?.top || 0;
     const width = menu.offsetWidth || box.width;
     const height = menu.offsetHeight || 0;
+    const left = Math.max(
+      edge,
+      Math.min(box.left, window.innerWidth - edge - width)
+    );
     const opensUpwards =
       box.bottom + gap + height > window.innerHeight - edge &&
       box.top - gap - height > edge;
-    menu.style.left = `${Math.round(
-      Math.max(edge, Math.min(box.left, window.innerWidth - edge - width))
-    )}px`;
+    menu.style.left = `${Math.round(left - offsetX)}px`;
     menu.style.top = `${Math.round(
-      opensUpwards ? box.top - gap - height : box.bottom + gap
+      (opensUpwards ? box.top - gap - height : box.bottom + gap) - offsetY
     )}px`;
   }
 
@@ -818,31 +830,20 @@ class HaEnergyPeriodCard extends HTMLElement {
         .period-select[data-disabled="true"] {
           opacity: var(--disabled-opacity, 0.55);
         }
-        .period-select::after {
-          position: absolute;
-          top: 50%;
-          right: var(--ha-space-2, 8px);
-          width: 8px;
-          height: 8px;
-          border-right: 2px solid var(--secondary-text-color);
-          border-bottom: 2px solid var(--secondary-text-color);
-          content: "";
-          pointer-events: none;
-          transform: translateY(-70%) rotate(45deg);
-        }
         .period-trigger {
           appearance: none;
           -webkit-appearance: none;
           box-sizing: border-box;
-          display: block;
+          display: flex;
+          align-items: center;
+          gap: var(--ha-space-2, 8px);
           min-width: 0;
           max-width: 100%;
           height: 100%;
           border: 0;
           border-radius: var(--ha-energy-period-card-field-radius);
           padding:
-            0 calc(var(--ha-space-3, 12px) + var(--ha-space-2, 8px))
-            0 var(--ha-space-3, 12px);
+            0 var(--ha-space-2, 8px) 0 var(--ha-space-3, 12px);
           color: inherit;
           background-color: var(--ha-energy-period-card-field-background);
           background-image: none;
@@ -851,11 +852,23 @@ class HaEnergyPeriodCard extends HTMLElement {
           font-weight: var(--ha-font-weight-normal, 400);
           letter-spacing: 0.25px;
           text-align: left;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
           cursor: pointer;
           transition: background-color var(--ha-energy-period-card-transition);
+        }
+        .period-value {
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .period-caret {
+          flex: none;
+          width: var(--ha-energy-period-card-caret-size, 10px);
+          height: var(--ha-energy-period-card-caret-size, 10px);
+          border-right: 2px solid var(--secondary-text-color);
+          border-bottom: 2px solid var(--secondary-text-color);
+          transform: translateY(-25%) rotate(45deg);
         }
         .period-trigger:hover:not(:disabled) {
           background-color: var(--ha-energy-period-card-field-hover-background);
@@ -1050,7 +1063,12 @@ class HaEnergyPeriodCard extends HTMLElement {
               aria-expanded="false"
               aria-label="Energy period"
               ${this._busy || !this._hass ? "disabled" : ""}
-            >${escapeHtml(labels[this._active] || labels[PERIODS[0]])}</button>
+            >
+              <span class="period-value"
+                >${escapeHtml(labels[this._active] || labels[PERIODS[0]])}</span
+              >
+              <span class="period-caret" aria-hidden="true"></span>
+            </button>
             <div
               class="period-menu"
               role="menu"
