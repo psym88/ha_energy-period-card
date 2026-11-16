@@ -248,7 +248,7 @@ test("renders an accessible dropdown, date range, and theme extension points", (
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /\.period-caret \{[^}]*width: var\(--ha-energy-period-card-caret-size, 0\.7em\);[^}]*border-right: 2px solid var\(--secondary-text-color\);[^}]*rotate\(45deg\)/
+    /\.period-caret \{[^}]*color: var\(--secondary-text-color\);[^}]*font-size: var\(\s*--ha-energy-period-card-caret-size,\s*var\(--ha-font-size-xl, 22px\)\s*\);[^}]*rotate\(90deg\)/
   );
   assert.match(
     card.shadowRoot.innerHTML,
@@ -409,7 +409,7 @@ test("gives every control in the row the same height", () => {
   );
   assert.match(
     card.shadowRoot.innerHTML,
-    /--ha-energy-period-card-caret-size: 0\.7em;/
+    /--ha-energy-period-card-caret-size:\s*var\(--ha-energy-period-card-nav-size, var\(--ha-font-size-xl, 22px\)\);/
   );
   assert.match(
     card.shadowRoot.innerHTML,

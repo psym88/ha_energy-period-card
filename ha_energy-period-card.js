@@ -745,7 +745,8 @@ class HaEnergyPeriodCard extends HTMLElement {
                 var(--ha-space-2, 8px)
             );
           --ha-energy-period-card-font-size: var(--ha-font-size-l, 16px);
-          --ha-energy-period-card-caret-size: 0.7em;
+          --ha-energy-period-card-caret-size:
+            var(--ha-energy-period-card-nav-size, var(--ha-font-size-xl, 22px));
           --ha-energy-period-card-nav-size: var(--ha-font-size-xl, 22px);
           --ha-energy-period-card-select-color: var(--primary-text-color);
           --ha-energy-period-card-field-background:
@@ -872,12 +873,24 @@ class HaEnergyPeriodCard extends HTMLElement {
           white-space: nowrap;
         }
         .period-caret {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           flex: none;
-          width: var(--ha-energy-period-card-caret-size, 0.7em);
-          height: var(--ha-energy-period-card-caret-size, 0.7em);
-          border-right: 2px solid var(--secondary-text-color);
-          border-bottom: 2px solid var(--secondary-text-color);
-          transform: translateY(-25%) rotate(45deg);
+          width: 0.5em;
+          height: 1em;
+          box-sizing: content-box;
+          color: var(--secondary-text-color);
+          font-family: inherit;
+          font-size: var(
+            --ha-energy-period-card-caret-size,
+            var(--ha-font-size-xl, 22px)
+          );
+          line-height: 1;
+          text-align: center;
+          /* The next-button glyph turned to point down, so both arrows are
+             drawn by the same hand. */
+          transform: rotate(90deg);
         }
         .period-trigger:hover:not(:disabled) {
           background-color: var(--ha-energy-period-card-field-hover-background);
@@ -1085,7 +1098,7 @@ class HaEnergyPeriodCard extends HTMLElement {
               <span class="period-value"
                 >${escapeHtml(labels[this._active] || labels[PERIODS[0]])}</span
               >
-              <span class="period-caret" aria-hidden="true"></span>
+              <span class="period-caret" aria-hidden="true">&#8250;</span>
             </button>
             <div
               class="period-menu"

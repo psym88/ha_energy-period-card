@@ -72,7 +72,7 @@ The card prioritizes Home Assistant's user-configurable theme colors and uses se
 | `--ha-energy-period-card-field-hover-background` | Background of the period dropdown on hover |
 | `--ha-energy-period-card-field-focus-color` | Ring around the period dropdown with keyboard focus |
 | `--ha-energy-period-card-field-radius` | Corner radius of the period dropdown |
-| `--ha-energy-period-card-caret-size` | Size of the arrow in the period dropdown; it defaults to 0.7em of the dropdown text |
+| `--ha-energy-period-card-caret-size` | Glyph of the arrow in the period dropdown; it defaults to the size of the arrows in the previous and next buttons |
 | `--ha-energy-period-card-nav-size` | Arrow glyph in the previous and next buttons |
 | `--ha-energy-period-card-menu-background` | Background of the open option list |
 | `--ha-energy-period-card-menu-border-color` | Border of the open option list |
